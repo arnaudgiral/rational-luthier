@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rational Luthier Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .card { border-radius: 12px; transition: all 0.3s ease; }
+        .input-focus:focus { outline: 2px solid #b45309; border-color: transparent; }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-900 font-sans p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto">
+        <header class="mb-10 text-center">
+            <h1 class="text-3xl font-bold text-amber-900 uppercase tracking-widest">Rational Luthier Assistant</h1>
+            <p class="text-stone-600 mt-2 italic">A Precision Tool for the Next Generation of Luthiers</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            
+            <div class="md:col-span-1 space-y-6">
+                <section class="bg-white p-6 shadow-sm border border-stone-200 card">
+                    <h2 class="font-bold text-stone-700 mb-4 border-b pb-2 uppercase text-sm">1. Select Project</h2>
+                    
+                    <label class="block text-xs font-semibold mb-1">Instrument Type</label>
+                    <select id="instrument" class="w-full p-2 bg-stone-100 border border-stone-300 mb-4 input-focus" onchange="updateTargets()">
+                        <optgroup label="Bowed Strings">
+                            <option value="violin">Violin (Strad Model)</option>
+                            <option value="viola">Viola (16" / 40.5cm)</option>
+                            <option value="cello">Cello (75.5cm Strad)</option>
+                            <option value="bass_violin">Bass Violin (80cm Borbon)</option>
+                            <option value="viol_jaye">Bass Viol (Jaye 6-str)</option>
+                            <option value="viol_colichon">Bass Viol (Colichon 7-str)</option>
+                        </optgroup>
+                        <optgroup label="Plucked Strings">
+                            <option value="classical_guitar">Classical Guitar (Hauser)</option>
+                            <option value="steel_string">Steel String (OM Model)</option>
+                        </optgroup>
+                    </select>
+
+                    <label class="block text-xs font-semibold mb-1">Wood Density (g/cm³)</label>
+                    <input type="number" id="density" value="0.37" step="0.01" class="w-full p-2 bg-stone-100 border border-stone-300 input-focus" oninput="updateTargets()">
+                </section>
+
+                <section class="bg-white p-6 shadow-sm border border-stone-200 card">
+                    <h2 class="font-bold text-stone-700 mb-4 border-b pb-2 uppercase text-sm">2. Current State</h2>
+                    <label class="block text-xs font-semibold mb-1">Current Plate Mass (g)</label>
+                    <input type="number" id="currMass" placeholder="e.g. 68" class="w-full p-2 bg-stone-100 border border-stone-300 mb-4 input-focus" oninput="updateTargets()">
+                    
+                    <label class="block text-xs font-semibold mb-1">Current M5 / M4 (Hz)</label>
+                    <input type="number" id="currFreq" placeholder="e.g. 311" class="w-full p-2 bg-stone-100 border border-stone-300 input-focus" oninput="updateTargets()">
+                </section>
+            </div>
+
+            <div class="md:col-span-2 space-y-6">
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-amber-900 text-white p-6 card shadow-lg">
+                        <span class="text-xs uppercase opacity-75">Target Mass (Adj.)</span>
+                        <div id="targetMass" class="text-4xl font-mono mt-2">--</div>
+                        <span class="text-[10px] italic">Based on your density</span>
+                    </div>
+                    <div class="bg-stone-800 text-white p-6 card shadow-lg">
+                        <span class="text-xs uppercase opacity-75">Target M5 / M4</span>
+                        <div id="targetFreq" class="text-4xl font-mono mt-2">--</div>
+                        <span class="text-[10px] italic">Target Resonance</span>
+                    </div>
+                </div>
+
+                <section id="analysisSection" class="bg-white p-8 border border-stone-200 card shadow-sm hidden">
+                    <h2 class="font-bold text-xl text-stone-800 mb-4">Luthier's Diagnosis</h2>
+                    <div id="diagnosisMessage" class="p-4 rounded-lg mb-6 text-sm leading-relaxed">
+                        </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="font-bold text-xs uppercase text-amber-700 mb-2">Efficiency Rating</h3>
+                            <div class="w-full bg-stone-200 h-4 rounded-full overflow-hidden">
+                                <div id="efficiencyBar" class="bg-green-600 h-full" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div id="nextSteps">
+                            <h3 class="font-bold text-xs uppercase text-amber-700 mb-2">Action Items</h3>
+                            <ul id="actionList" class="text-sm space-y-1 list-disc pl-4 text-stone-600">
+                                </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <div id="placeholder" class="bg-stone-100 border-2 border-dashed border-stone-300 p-12 text-center text-stone-400 rounded-xl">
+                    Enter Current Mass and Frequency to see the Rational Diagnosis.
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const library = {
+            violin: { refMass: 65, refM5: 335, refDensity: 0.37, family: 'bowed' },
+            viola: { refMass: 105, refM5: 285, refDensity: 0.38, family: 'bowed' },
+            cello: { refMass: 420, refM5: 165, refDensity: 0.35, family: 'bowed' },
+            bass_violin: { refMass: 460, refM5: 150, refDensity: 0.35, family: 'bowed' },
+            viol_jaye: { refMass: 175, refM5: 110, refDensity: 0.36, family: 'viol' },
+            viol_colichon: { refMass: 225, refM5: 90, refDensity: 0.36, family: 'viol' },
+            classical_guitar: { refMass: 175, refM5: 185, refDensity: 0.40, family: 'guitar' },
+            steel_string: { refMass: 190, refM5: 195, refDensity: 0.42, family: 'guitar' }
+        };
+
+        function updateTargets() {
+            const instKey = document.getElementById('instrument').value;
+            const density = parseFloat(document.getElementById('density').value);
+            const currMass = parseFloat(document.getElementById('currMass').value);
+            const currFreq = parseFloat(document.getElementById('currFreq').value);
+            
+            const ref = library[instKey];
+
+            // Scaling Calculations
+            // Mass adjusts linearly with density
+            let targetMass = ref.refMass * (density / ref.refDensity);
+            // Frequency adjusts with the square root of stiffness/density
+            let targetFreq = ref.refM5 * Math.sqrt(ref.refDensity / density);
+
+            document.getElementById('targetMass').innerText = targetMass.toFixed(1) + 'g';
+            document.getElementById('targetFreq').innerText = targetFreq.toFixed(0) + 'Hz';
+
+            if (currMass && currFreq) {
+                document.getElementById('analysisSection').classList.remove('hidden');
+                document.getElementById('placeholder').classList.add('hidden');
+                runDoctor(currMass, currFreq, targetMass, targetFreq, ref);
+            }
+        }
+
+        function runDoctor(cM, cF, tM, tF, ref) {
+            const diagBox = document.getElementById('diagnosisMessage');
+            const actionList = document.getElementById('actionList');
+            const effBar = document.getElementById('efficiencyBar');
+            
+            actionList.innerHTML = "";
+            let efficiency = (cF / cM) / (tF / tM);
+            let effPercent = Math.min(Math.max(efficiency * 100, 0), 100);
+            effBar.style.width = effPercent + "%";
+
+            if (cM > tM && cF < tF) {
+                diagBox.className = "p-4 rounded-lg mb-6 text-sm bg-red-50 text-red-800 border border-red-200";
+                diagBox.innerHTML = "<strong>CRITICAL:</strong> Plate is currently too heavy and insufficiently stiff. You are in the 'Damping Zone'.";
+                actionList.innerHTML += "<li>Reduce weight in the lungs and recurve immediately.</li>";
+                actionList.innerHTML += "<li>Do not thin the center spine until frequency rises.</li>";
+                actionList.innerHTML += "<li>Check for localized 'thick spots' in the upper bouts.</li>";
+            } else if (cM > tM && cF >= tF) {
+                diagBox.className = "p-4 rounded-lg mb-6 text-sm bg-amber-50 text-amber-800 border border-amber-200";
+                diagBox.innerHTML = "<strong>HEAVY:</strong> You have reached your stiffness target, but the plate is too massive. The instrument will lack responsiveness.";
+                actionList.innerHTML += "<li>Remove wood from low-stress areas (edges/channels).</li>";
+                actionList.innerHTML += "<li>Taper the perimeter graduation more aggressively.</li>";
+            } else if (cM <= tM && cF < tF) {
+                diagBox.className = "p-4 rounded-lg mb-6 text-sm bg-blue-50 text-blue-800 border border-blue-200";
+                diagBox.innerHTML = "<strong>UNDER-STIFF:</strong> Weight is good, but stiffness is too low. This wood may be 'floppy'.";
+                actionList.innerHTML += "<li>STOP thinning. The plate needs a taller bass bar to recover stiffness.</li>";
+                actionList.innerHTML += "<li>Ensure the bass bar is fitted without built-in tension.</li>";
+            } else {
+                diagBox.className = "p-4 rounded-lg mb-6 text-sm bg-green-50 text-green-800 border border-green-200";
+                diagBox.innerHTML = "<strong>OPTIMAL:</strong> You are within the Rational Target zone. Proceed with finishing.";
+                actionList.innerHTML += "<li>Prepare for final surface prep and varnish.</li>";
+            }
+        }
+    </script>
+</body>
+</html>
