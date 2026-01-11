@@ -3,149 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rational Luthier Assistant v3.0</title>
+    <title>Rational Luthier Assistant v3.2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .card { border-radius: 12px; transition: all 0.3s ease; border: 1px solid #e7e5e4; }
         .input-focus:focus { outline: 2px solid #78350f; border-color: transparent; }
-        .logic-panel { background: linear-gradient(145deg, #ffffff, #f5f5f4); }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 50; align-items: center; justify-content: center; }
+        .chladni-node { width: 12px; height: 12px; background: #fbbf24; border-radius: 50%; display: inline-block; margin-right: 4px; }
     </style>
 </head>
 <body class="bg-stone-50 text-stone-900 font-sans p-4 md:p-12">
 
     <div class="max-w-7xl mx-auto">
-        <header class="mb-12 border-b-4 border-stone-800 pb-6 flex flex-col md:flex-row justify-between items-end">
+        <header class="mb-10 border-b-4 border-stone-800 pb-6 flex flex-col md:flex-row justify-between items-end">
             <div>
-                <h1 class="text-5xl font-black text-stone-800 tracking-tighter italic">RATIONAL LUTHIER <span class="text-amber-800">v3.0</span></h1>
-                <p class="text-stone-500 font-bold uppercase tracking-widest text-sm mt-2">New Instrument Construction & Precision Scaling</p>
+                <h1 class="text-5xl font-black text-stone-800 tracking-tighter italic">RATIONAL LUTHIER <span class="text-amber-800 uppercase">v3.2</span></h1>
+                <p class="text-stone-500 font-bold uppercase tracking-widest text-sm mt-2">Precision Workshop Suite • Visual Reference Integrated</p>
             </div>
-            <div class="text-right no-print mt-4 md:mt-0">
-                <button onclick="exportReport()" class="bg-stone-800 text-white px-8 py-3 rounded-full font-black text-xs uppercase tracking-widest hover:bg-black transition shadow-lg">Export Workshop Report</button>
+            <div class="flex flex-wrap gap-2 no-print mt-4 md:mt-0">
+                <button onclick="saveToLog()" class="bg-amber-800 text-white px-5 py-3 rounded-lg font-black text-xs uppercase hover:bg-amber-900 transition shadow-md">Record Measurement</button>
+                <button onclick="toggleVisuals()" class="bg-blue-800 text-white px-5 py-3 rounded-lg font-black text-xs uppercase hover:bg-blue-900 transition shadow-md">Chladni Guide</button>
+                <button onclick="exportReport()" class="bg-stone-800 text-white px-5 py-3 rounded-lg font-black text-xs uppercase hover:bg-black transition shadow-md">Export JSON</button>
             </div>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             
-            <div class="lg:col-span-4 space-y-8">
-                
+            <div class="lg:col-span-4 space-y-6">
                 <section class="bg-white p-6 shadow-sm card border-t-8 border-stone-800">
-                    <h2 class="text-xs font-black uppercase tracking-widest text-stone-400 mb-6">1. Project Architecture</h2>
+                    <h2 class="text-xs font-black uppercase tracking-widest text-stone-400 mb-6">1. Configuration</h2>
                     
-                    <label class="block text-[10px] font-black mb-1 uppercase text-stone-500 tracking-tighter">Instrument Model</label>
-                    <select id="instrument" class="w-full p-3 bg-stone-50 border border-stone-200 mb-6 font-bold text-lg" onchange="initProject()">
-                        <optgroup label="Bowed: Violin Family">
-                            <option value="violin">Violin (Stradivari Model)</option>
-                            <option value="viola">Viola (16" Pattern)</option>
-                            <option value="cello">Cello (Strad B-Form)</option>
-                            <option value="bass_violin">Bass Violin (Borbon 80cm)</option>
+                    <label class="block text-[10px] font-black mb-1 uppercase text-stone-500">Model</label>
+                    <select id="instrument" class="w-full p-3 bg-stone-50 border border-stone-200 mb-4 font-bold" onchange="initProjectUI()">
+                        <optgroup label="Bowed">
+                            <option value="violin">Violin (Stradivari)</option>
+                            <option value="viola">Viola (16")</option>
+                            <option value="cello">Cello (Strad B)</option>
+                            <option value="bass_violin">Bass Violin (Borbon)</option>
+                            <option value="viol_jaye">Bass Viol (Jaye)</option>
+                            <option value="viol_colichon">Bass Viol (Colichon)</option>
                         </optgroup>
-                        <optgroup label="Bowed: Viols">
-                            <option value="viol_jaye">Bass Viol (Henry Jaye)</option>
-                            <option value="viol_colichon">Bass Viol (Nicolas Colichon)</option>
-                        </optgroup>
-                        <optgroup label="Plucked: Guitars">
-                            <option value="classical_hauser">Classical (Hauser Pattern)</option>
-                            <option value="steel_string_om">Steel String (OM Style)</option>
+                        <optgroup label="Plucked">
+                            <option value="classical_hauser">Classical (Hauser)</option>
+                            <option value="steel_string_om">Steel String (OM)</option>
                         </optgroup>
                     </select>
 
-                    <div class="grid grid-cols-2 gap-2 mb-6">
+                    <div class="grid grid-cols-2 gap-2 mb-4">
                         <button id="btnFront" onclick="setPlate('front')" class="py-3 text-xs font-black border-2 border-stone-800 bg-stone-800 text-white rounded-lg">FRONT</button>
                         <button id="btnBack" onclick="setPlate('back')" class="py-3 text-xs font-black border-2 border-stone-200 text-stone-400 rounded-lg">BACK</button>
                     </div>
 
-                    <label class="block text-[10px] font-black mb-1 uppercase text-stone-500 tracking-tighter">Arching Profile</label>
-                    <select id="arching" class="w-full p-3 bg-stone-50 border border-stone-200 mb-6 font-bold" onchange="calculate()">
-                        <option value="flat">Standard / Flat (e.g., Stradivari / Hauser)</option>
-                        <option value="high">High / Full (e.g., Stainer / Amati)</option>
-                    </select>
-
-                    <label class="block text-[10px] font-black mb-1 uppercase text-stone-500 tracking-tighter">Current Build Step</label>
-                    <select id="step" class="w-full p-3 bg-amber-50 border border-amber-200 font-bold text-amber-900" onchange="calculate()">
+                    <div id="archingContainer">
+                        <label class="block text-[10px] font-black mb-1 uppercase text-stone-500">Arching Architecture</label>
+                        <select id="arching" class="w-full p-3 bg-stone-50 border border-stone-200 mb-4 font-bold" onchange="calculate()">
+                            <option value="flat">Standard (Stradivari Style)</option>
+                            <option value="high">High Arch (Stainer Style)</option>
                         </select>
+                    </div>
+
+                    <label class="block text-[10px] font-black mb-1 uppercase text-stone-500">Construction Phase</label>
+                    <select id="step" class="w-full p-3 bg-amber-50 border border-amber-200 font-bold text-amber-900" onchange="calculate()">
+                    </select>
                 </section>
 
                 <section class="bg-white p-6 shadow-sm card border-t-8 border-amber-800">
                     <h2 class="text-xs font-black uppercase tracking-widest text-stone-400 mb-6">2. Material Physics</h2>
-                    
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-[10px] font-black mb-1 uppercase text-stone-500 italic">Density (ρ)</label>
-                            <input type="number" id="density" value="0.37" step="0.01" class="w-full p-3 bg-stone-50 border border-stone-200 font-mono font-bold text-xl input-focus" oninput="calculate()">
+                            <input type="number" id="density" value="0.37" step="0.01" class="w-full p-3 bg-stone-50 border border-stone-200 font-mono font-bold text-xl" oninput="calculate()">
                         </div>
                         <div>
                             <label class="block text-[10px] font-black mb-1 uppercase text-stone-500 italic">Sound Speed (m/s)</label>
-                            <input type="number" id="speed" value="5200" class="w-full p-3 bg-stone-50 border border-stone-200 font-mono font-bold text-xl input-focus" oninput="calculate()">
+                            <input type="number" id="speed" placeholder="Optional" class="w-full p-3 bg-stone-50 border border-stone-200 font-mono font-bold text-xl" oninput="calculate()">
                         </div>
                     </div>
-                    <div id="woodAdvice" class="mt-4 p-3 bg-stone-100 rounded text-[10px] text-stone-500 font-medium leading-relaxed">
-                        </div>
                 </section>
             </div>
 
-            <div class="lg:col-span-8 space-y-8">
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-white p-8 shadow-xl card border-b-8 border-amber-800">
-                        <span class="text-xs font-black uppercase text-stone-400 tracking-widest italic underline">Target Mass (Precision Scale)</span>
-                        <div id="targetMass" class="text-6xl font-mono font-black text-stone-800 mt-4 tracking-tighter">--</div>
+            <div class="lg:col-span-8 space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-white p-5 shadow card border-b-8 border-amber-800 text-center">
+                        <span class="text-[10px] font-black uppercase text-stone-400">Target Mass</span>
+                        <div id="targetMass" class="text-4xl font-mono font-black text-stone-800">--</div>
                     </div>
-                    <div class="bg-white p-8 shadow-xl card border-b-8 border-stone-800">
-                        <span id="targetModeLabel" class="text-xs font-black uppercase text-stone-400 tracking-widest italic underline">Target Frequency (M5)</span>
-                        <div id="targetFreq" class="text-6xl font-mono font-black text-stone-800 mt-4 tracking-tighter">--</div>
+                    <div class="bg-white p-5 shadow card border-b-8 border-stone-800 text-center">
+                        <span id="targetModeLabel" class="text-[10px] font-black uppercase text-stone-400">Target Freq</span>
+                        <div id="targetFreq" class="text-4xl font-mono font-black text-stone-800">--</div>
+                    </div>
+                    <div class="bg-stone-100 p-5 shadow card border-b-8 border-stone-400 text-center">
+                        <span class="text-[10px] font-black uppercase text-stone-400">Est. Thickness</span>
+                        <div id="predictedThickness" class="text-4xl font-mono font-black text-stone-500">--</div>
                     </div>
                 </div>
 
-                <section id="doctorPanel" class="bg-stone-800 text-white p-10 card shadow-2xl">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-                        <h2 class="font-black italic text-3xl uppercase tracking-tighter">The Rational Doctor</h2>
-                        <div id="efficiencyTag" class="px-8 py-3 bg-white text-stone-900 font-black text-2xl rounded-full">--%</div>
+                <section class="bg-stone-800 text-white p-8 card shadow-xl">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="font-black italic text-2xl uppercase tracking-tighter">Workbench Doctor</h2>
+                        <div id="efficiencyTag" class="px-6 py-2 bg-stone-700 text-white font-black text-xl rounded">--%</div>
                     </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-12 border-t border-stone-700 pt-8">
-                        <div>
-                            <label class="text-[10px] font-bold text-amber-500 uppercase tracking-widest mb-4 block">Workbench Readings</label>
-                            <div class="space-y-6">
-                                <div>
-                                    <span class="text-[10px] text-stone-400 block mb-1">Measured Mass (g)</span>
-                                    <input type="number" id="currMass" class="w-full bg-stone-700 border-none p-4 font-mono text-3xl text-amber-400 rounded shadow-inner" oninput="diagnose()">
-                                </div>
-                                <div>
-                                    <span class="text-[10px] text-stone-400 block mb-1">Measured Frequency (Hz)</span>
-                                    <input type="number" id="currFreq" class="w-full bg-stone-700 border-none p-4 font-mono text-3xl text-amber-400 rounded shadow-inner" oninput="diagnose()">
-                                </div>
-                            </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        <div class="space-y-4">
+                            <input type="number" id="currMass" placeholder="Actual Mass (g)" class="w-full bg-stone-700 border-none p-4 font-mono text-2xl text-amber-400 rounded" oninput="diagnose()">
+                            <input type="number" id="currFreq" placeholder="Actual Freq (Hz)" class="w-full bg-stone-700 border-none p-4 font-mono text-2xl text-amber-400 rounded" oninput="diagnose()">
                         </div>
-
-                        <div>
-                            <label class="text-[10px] font-bold text-amber-500 uppercase tracking-widest mb-4 block">Rational Diagnosis</label>
-                            <div id="diagnosisBox" class="text-lg font-medium leading-relaxed text-stone-200">
-                                Enter workbench data to receive specific thicknessing directives.
-                            </div>
-                            <ul id="stepAction" class="mt-6 space-y-4 text-sm font-bold text-amber-200 italic underline">
-                                </ul>
+                        <div class="bg-stone-900/50 p-5 rounded">
+                            <div id="diagnosisBox" class="text-sm font-medium mb-4 text-stone-300">Enter data for directive...</div>
+                            <ul id="stepAction" class="space-y-2 text-xs font-bold text-amber-200 list-disc pl-4"></ul>
                         </div>
                     </div>
                 </section>
 
-                <div class="bg-white p-6 shadow card">
-                    <h3 class="text-xs font-black uppercase text-stone-400 mb-4 tracking-widest">History: Construction Trajectory</h3>
-                    <table class="w-full text-left text-[11px] border-collapse">
-                        <thead>
-                            <tr class="border-b-2 border-stone-100 text-stone-400 uppercase">
-                                <th class="py-3">Component / Step</th>
-                                <th>Density</th>
-                                <th>Speed</th>
-                                <th>Mass</th>
-                                <th>Freq</th>
-                                <th>Eff%</th>
-                            </tr>
-                        </thead>
-                        <tbody id="historyBody" class="font-bold text-stone-700">
-                        </tbody>
-                    </table>
-                </div>
+                <section class="bg-white p-5 shadow card">
+                    <h3 class="text-xs font-black uppercase text-stone-400 mb-4 tracking-widest italic">Workbench Log</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-[11px]">
+                            <thead><tr class="border-b border-stone-200 text-stone-400 uppercase"><th class="py-2">Step</th><th>Mass</th><th>Freq</th><th>Eff%</th></tr></thead>
+                            <tbody id="historyBody" class="font-bold"></tbody>
+                        </table>
+                    </div>
+                </section>
             </div>
+        </div>
+    </div>
+
+    <div id="visualModal" class="modal flex" onclick="toggleVisuals()">
+        <div class="bg-white p-10 max-w-2xl w-full mx-4 rounded-xl shadow-2xl" onclick="event.stopPropagation()">
+            <h2 id="modalTitle" class="text-2xl font-black italic mb-4 uppercase">Chladni Reference</h2>
+            <div id="modalContent" class="space-y-6">
+                </div>
+            <button onclick="toggleVisuals()" class="mt-8 w-full py-4 bg-stone-800 text-white font-black uppercase text-xs tracking-widest rounded">Return to Workshop</button>
         </div>
     </div>
 
@@ -154,67 +142,29 @@
         let history = [];
 
         const library = {
-            violin: {
-                f_raw: { m: 62, f: 305, d: 0.37, c: 5200, mode: 'M5' },
-                f_holes: { m: 60, f: 290, d: 0.37, c: 5200, mode: 'M5' },
-                f_barred: { m: 66, f: 345, d: 0.37, c: 5200, mode: 'M5' },
-                back: { m: 108, f: 370, d: 0.58, c: 4200, mode: 'M5' }
-            },
-            viola: {
-                f_raw: { m: 98, f: 270, d: 0.38, c: 5200, mode: 'M5' },
-                f_barred: { m: 105, f: 310, d: 0.38, c: 5200, mode: 'M5' },
-                back: { m: 165, f: 330, d: 0.59, c: 4200, mode: 'M5' }
-            },
-            cello: {
-                f_raw: { m: 380, f: 145, d: 0.35, c: 5100, mode: 'M5' },
-                f_barred: { m: 420, f: 170, d: 0.35, c: 5100, mode: 'M5' },
-                back: { m: 760, f: 190, d: 0.60, c: 4100, mode: 'M5' }
-            },
-            bass_violin: {
-                f_raw: { m: 430, f: 125, d: 0.35, c: 5000, mode: 'M5' },
-                f_barred: { m: 465, f: 155, d: 0.35, c: 5000, mode: 'M5' },
-                back: { m: 860, f: 180, d: 0.61, c: 4100, mode: 'M5' }
-            },
-            viol_jaye: {
-                f_raw: { m: 165, f: 105, d: 0.36, c: 5200, mode: 'M5' },
-                back: { m: 280, f: 115, d: 0.62, c: 4200, mode: 'M5' }
-            },
-            viol_colichon: {
-                f_raw: { m: 210, f: 88, d: 0.36, c: 5200, mode: 'M5' },
-                back: { m: 370, f: 102, d: 0.62, c: 4200, mode: 'M5' }
-            },
-            classical_hauser: {
-                f_raw: { m: 132, f: 98, d: 0.40, c: 5400, mode: 'M2' },
-                f_braced: { m: 178, f: 188, d: 0.40, c: 5400, mode: 'M4' },
-                back: { m: 215, f: 225, d: 0.82, c: 4400, mode: 'M5' }
-            },
-            steel_string_om: {
-                f_raw: { m: 148, f: 105, d: 0.42, c: 5400, mode: 'M2' },
-                f_braced: { m: 215, f: 208, d: 0.42, c: 5400, mode: 'M4' },
-                back: { m: 245, f: 245, d: 0.84, c: 4400, mode: 'M5' }
-            }
+            violin: { f_raw: {m:62, f:305, d:0.37, c:5200, t:3.0, mode:'M5'}, f_holes: {m:60, f:290, d:0.37, c:5200, t:3.0, mode:'M5'}, f_barred: {m:66, f:345, d:0.37, c:5200, t:3.0, mode:'M5'}, back: {m:108, f:370, d:0.58, c:4200, t:4.5, mode:'M5'} },
+            viola: { f_raw: {m:98, f:270, d:0.38, c:5200, t:3.2, mode:'M5'}, f_holes: {m:95, f:258, d:0.38, c:5200, t:3.2, mode:'M5'}, f_barred: {m:105, f:310, d:0.38, c:5200, t:3.2, mode:'M5'}, back: {m:165, f:330, d:0.59, c:4200, t:5.0, mode:'M5'} },
+            cello: { f_raw: {m:380, f:145, d:0.35, c:5100, t:5.5, mode:'M5'}, f_holes: {m:372, f:136, d:0.35, c:5100, t:5.5, mode:'M5'}, f_barred: {m:420, f:170, d:0.35, c:5100, t:5.5, mode:'M5'}, back: {m:760, f:190, d:0.60, c:4100, t:8.5, mode:'M5'} },
+            bass_violin: { f_raw: {m:430, f:125, d:0.35, c:5000, t:6.5, mode:'M5'}, f_holes: {m:420, f:116, d:0.35, c:5000, t:6.5, mode:'M5'}, f_barred: {m:465, f:155, d:0.35, c:5000, t:6.5, mode:'M5'}, back: {m:860, f:180, d:0.61, c:4100, t:9.5, mode:'M5'} },
+            viol_jaye: { f_raw: {m:165, f:105, d:0.36, c:5200, t:2.8, mode:'M5'}, back: {m:280, f:115, d:0.62, c:4200, t:4.0, mode:'M5'} },
+            viol_colichon: { f_raw: {m:210, f:88, d:0.36, c:5200, t:3.0, mode:'M5'}, back: {m:370, f:102, d:0.62, c:4200, t:4.2, mode:'M5'} },
+            classical_hauser: { f_raw: {m:132, f:98, d:0.40, c:5400, t:2.6, mode:'M2'}, f_holes: {m:128, f:92, d:0.40, c:5400, t:2.6, mode:'M2'}, f_braced: {m:178, f:188, d:0.40, c:5400, t:2.6, mode:'M4'}, back: {m:215, f:225, d:0.82, c:4400, t:2.2, mode:'M5'} },
+            steel_string_om: { f_raw: {m:148, f:105, d:0.42, c:5400, t:2.8, mode:'M2'}, f_holes: {m:144, f:98, d:0.42, c:5400, t:2.8, mode:'M2'}, f_braced: {m:215, f:208, d:0.42, c:5400, t:2.8, mode:'M4'}, back: {m:245, f:245, d:0.84, c:4400, t:2.4, mode:'M5'} }
         };
 
-        function initProject() {
+        function initProjectUI() {
             const inst = document.getElementById('instrument').value;
             const stepSel = document.getElementById('step');
-            const densInput = document.getElementById('density');
-            const speedInput = document.getElementById('speed');
+            const archCont = document.getElementById('archingContainer');
+            archCont.style.display = (inst.includes('hauser') || inst.includes('om')) ? 'none' : 'block';
 
             if (currentPlate === 'front') {
-                densInput.value = 0.37;
-                speedInput.value = 5200;
-                if (inst.includes('guitar')) {
-                    stepSel.innerHTML = `<option value="f_raw">Raw Plate (Graduated)</option><option value="f_braced">Braced & Final Tuned</option>`;
-                } else if (inst.includes('violin') || inst.includes('cello')) {
-                    stepSel.innerHTML = `<option value="f_raw">Raw Plate</option><option value="f_holes">F-Holes Cut</option><option value="f_barred">Bass Bar Fitted</option>`;
-                } else {
-                    stepSel.innerHTML = `<option value="f_raw">Raw Plate</option>`;
-                }
+                stepSel.innerHTML = (inst.includes('hauser') || inst.includes('om')) ? 
+                    `<option value="f_raw">Raw Plate</option><option value="f_holes">Soundhole Cut</option><option value="f_braced">Braced & Finished</option>` :
+                    (inst.includes('viol_')) ? `<option value="f_raw">Plate Graduation</option>` :
+                    `<option value="f_raw">Raw Plate</option><option value="f_holes">F-Holes Cut</option><option value="f_barred">Bass Bar Fitted</option>`;
             } else {
-                densInput.value = inst.includes('guitar') ? 0.82 : 0.60;
-                speedInput.value = 4200;
-                stepSel.innerHTML = `<option value="back">Final Back Graduation</option>`;
+                stepSel.innerHTML = `<option value="back">Final Graduation</option>`;
             }
             calculate();
         }
@@ -223,39 +173,26 @@
             currentPlate = type;
             document.getElementById('btnFront').className = type === 'front' ? 'py-3 text-xs font-black border-2 border-stone-800 bg-stone-800 text-white rounded-lg' : 'py-3 text-xs font-black border-2 border-stone-200 text-stone-400 rounded-lg';
             document.getElementById('btnBack').className = type === 'back' ? 'py-3 text-xs font-black border-2 border-stone-800 bg-stone-800 text-white rounded-lg' : 'py-3 text-xs font-black border-2 border-stone-200 text-stone-400 rounded-lg';
-            initProject();
+            initProjectUI();
         }
 
         function calculate() {
             const inst = document.getElementById('instrument').value;
             const step = document.getElementById('step').value;
             const arch = document.getElementById('arching').value;
-            const dens = parseFloat(document.getElementById('density').value);
+            const dens = parseFloat(document.getElementById('density').value) || 0.37;
             const speed = parseFloat(document.getElementById('speed').value);
-            const woodAdvice = document.getElementById('woodAdvice');
-
-            const ref = library[inst][step];
+            const ref = library[inst][step] || library[inst].back;
             
-            // Rational Scaling Formula
-            // Mass scales linearly with density. 
-            // Freq scales with Specific Stiffness (Speed of Sound) and sqrt of Density
             let tM = ref.m * (dens / ref.d);
-            let tF = ref.f * (speed / ref.c) * Math.sqrt(ref.d / dens);
-
-            if (arch === 'high') {
-                tM *= 0.94; // 6% mass reduction for high arch structural stiffness
-                tF *= 1.02; // 2% freq increase due to geometry
-            }
-
-            document.getElementById('targetMass').innerText = tM.toFixed(1) + 'g';
-            document.getElementById('targetFreq').innerText = tF.toFixed(0) + 'Hz';
-            document.getElementById('targetModeLabel').innerText = `Target Frequency (${ref.mode})`;
-
-            // Advice Section
-            if (speed > 5500) woodAdvice.innerText = "EXCEPTIONAL STIFFNESS: This wood is 'fast'. You can afford a slightly higher target mass to gain power without losing response.";
-            else if (speed < 4800 && currentPlate === 'front') woodAdvice.innerText = "LOW VELOCITY: High internal damping. You must hit the lower end of the mass target to keep the instrument from sounding 'nasal'.";
-            else woodAdvice.innerText = "STANDARD GRADE: Wood properties within normal structural parameters.";
-
+            let tF = ref.f * Math.sqrt(ref.d / dens);
+            if (speed > 0) tF *= (speed / ref.c);
+            if (!(inst.includes('hauser') || inst.includes('om')) && arch === 'high') { tM *= 0.94; tF *= 1.02; }
+            
+            document.getElementById('targetMass').innerText = Math.round(tM) + 'g';
+            document.getElementById('targetFreq').innerText = Math.round(tF) + 'Hz';
+            document.getElementById('predictedThickness').innerText = (ref.t * (ref.d / dens)).toFixed(2) + 'mm';
+            document.getElementById('targetModeLabel').innerText = `Target Freq (${ref.mode})`;
             diagnose();
         }
 
@@ -264,42 +201,78 @@
             const cF = parseFloat(document.getElementById('currFreq').value);
             const tM = parseFloat(document.getElementById('targetMass').innerText);
             const tF = parseFloat(document.getElementById('targetFreq').innerText);
-            
             if (!cM || !cF) return;
-
             const eff = Math.round(((cF / cM) / (tF / tM)) * 100);
-            const tag = document.getElementById('efficiencyTag');
             const box = document.getElementById('diagnosisBox');
             const action = document.getElementById('stepAction');
+            document.getElementById('efficiencyTag').innerText = eff + "%";
 
-            tag.innerText = eff + "%";
-            
             if (eff >= 98 && eff <= 102) {
-                tag.className = "px-8 py-3 bg-green-500 text-white font-black text-2xl rounded-full";
-                box.innerHTML = "STATUS: <span class='text-green-400'>RATIONAL PEAK</span>. The plate has achieved its ideal mass-to-stiffness ratio for this specific piece of wood.";
-                action.innerHTML = "<li>• STOP graduation.</li><li>• Prepare for final surface finish.</li>";
+                box.innerHTML = "<span class='text-green-500 font-black'>TARGET REACHED.</span> Plate is rationalized.";
+                action.innerHTML = "<li>Stop material removal.</li><li>Check tap tones for clarity.</li>";
             } else if (eff < 98) {
-                tag.className = "px-8 py-3 bg-amber-600 text-white font-black text-2xl rounded-full";
-                box.innerHTML = "STATUS: <span class='text-amber-400'>DAMPED (HEAVY)</span>. The plate is carrying parasitic mass that is not contributing to stiffness.";
-                action.innerHTML = "<li>• Reduce thickness in 'The Lungs' (upper/lower bouts).</li><li>• Avoid the center 'Spine' to maintain fundamental frequency.</li>";
+                box.innerHTML = "<span class='text-amber-500 font-black'>DAMPED.</span> Excessive mass detected.";
+                action.innerHTML = "<li>Thin the lungs (upper/lower bouts).</li><li>Do not touch the spine.</li>";
             } else {
-                tag.className = "px-8 py-3 bg-blue-500 text-white font-black text-2xl rounded-full";
-                box.innerHTML = "STATUS: <span class='text-blue-400'>OVER-STIFF (TIGHT)</span>. The stiffness is too high for the mass. The instrument may sound brittle.";
-                action.innerHTML = "<li>• Thin the 'Spine' (center) to allow more flexibility.</li><li>• For guitar: Scallop brace ends.</li>";
+                box.innerHTML = "<span class='text-blue-500 font-black'>STIFF.</span> High tension/low mass.";
+                action.innerHTML = "<li>Thin the central spine.</li><li>Check arching blend.</li>";
             }
         }
 
-        function exportReport() {
+        function toggleVisuals() {
+            const modal = document.getElementById('visualModal');
+            const content = document.getElementById('modalContent');
             const inst = document.getElementById('instrument').value;
-            const log = `RATIONAL REPORT - ${new Date().toLocaleDateString()}\nInstrument: ${inst}\nTarget: ${document.getElementById('targetMass').innerText} / ${document.getElementById('targetFreq').innerText}\nWorkbench: ${document.getElementById('currMass').value}g / ${document.getElementById('currFreq').value}Hz\nEfficiency: ${document.getElementById('efficiencyTag').innerText}`;
-            const blob = new Blob([log], {type: 'text/plain'});
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `Rational_Report_${inst}.txt`;
-            a.click();
+            const step = document.getElementById('step').value;
+            const ref = library[inst][step] || library[inst].back;
+
+            if (modal.style.display === 'flex') {
+                modal.style.display = 'none';
+            } else {
+                modal.style.display = 'flex';
+                let patternName = ref.mode;
+                content.innerHTML = `
+                    <div class="p-4 bg-stone-100 rounded border-l-4 border-amber-800">
+                        <h3 class="font-black text-lg uppercase">${patternName} Mode Guide</h3>
+                        <p class="text-sm text-stone-600 mt-2">Hold the plate firmly at the <span class="text-amber-800 font-bold">Node Points</span> (yellow) to excite the resonance.</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="border p-4 rounded text-center">
+                            <span class="block text-[10px] font-black uppercase text-stone-400">Holding Points</span>
+                            <p class="text-sm font-bold mt-2">${patternName === 'M5' ? 'At the 4 "corners" of the lung recurve' : 'Along the center cross-line'}</p>
+                        </div>
+                        <div class="border p-4 rounded text-center">
+                            <span class="block text-[10px] font-black uppercase text-stone-400">Visual Pattern</span>
+                            <p class="text-sm font-bold mt-2">${patternName === 'M5' ? 'The closed ring' : 'Two vertical nodal lines'}</p>
+                        </div>
+                    </div>
+                `;
+            }
         }
 
-        initProject();
+        function saveToLog() {
+            const log = {
+                step: document.getElementById('step').value,
+                mass: document.getElementById('currMass').value,
+                freq: document.getElementById('currFreq').value,
+                eff: document.getElementById('efficiencyTag').innerText
+            };
+            if(!log.mass || !log.freq) return alert("Enter workbench data.");
+            history.unshift(log);
+            document.getElementById('historyBody').innerHTML = history.map(h => `
+                <tr class="border-b border-stone-100">
+                    <td class="py-2 text-amber-800 uppercase italic">${h.step.replace('f_', '')}</td>
+                    <td>${h.mass}g</td><td>${h.freq}Hz</td><td class="text-stone-900">${h.eff}</td>
+                </tr>
+            `).join('');
+        }
+
+        function exportReport() {
+            const blob = new Blob([JSON.stringify(history, null, 2)], {type: 'application/json'});
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Workshop_Log.json`; a.click();
+        }
+
+        initProjectUI();
     </script>
 </body>
 </html>
