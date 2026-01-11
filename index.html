@@ -3,30 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rational Luthier Assistant</title>
+    <title>Rational Luthier Assistant v2.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .card { border-radius: 12px; transition: all 0.3s ease; }
-        .input-focus:focus { outline: 2px solid #b45309; border-color: transparent; }
-        select:disabled { opacity: 0.5; cursor: not-allowed; }
+        .card { border-radius: 8px; transition: all 0.2s ease; }
+        .input-focus:focus { outline: 2px solid #92400e; border-color: transparent; }
+        .mode-doc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
     </style>
 </head>
-<body class="bg-stone-50 text-stone-900 font-sans p-4 md:p-8">
+<body class="bg-stone-100 text-stone-900 font-sans p-4 md:p-10">
 
-    <div class="max-w-5xl mx-auto">
-        <header class="mb-10 text-center">
-            <h1 class="text-3xl font-bold text-stone-700 uppercase tracking-widest">Rational Luthier Assistant</h1>
-            <p class="text-stone-200 mt-2 italic">Refining the Balance of Mass and Stiffness</p>
+    <div class="max-w-6xl mx-auto">
+        <header class="mb-12 border-b border-stone-300 pb-6 flex flex-col md:flex-row justify-between items-end">
+            <div>
+                <h1 class="text-4xl font-black text-stone-800 tracking-tighter italic">RATIONAL LUTHIER <span class="text-amber-700">v2.1</span></h1>
+                <p class="text-stone-500 font-medium">High-Precision Calibration Tool • ±2% Efficiency Tolerance</p>
+            </div>
+            <div class="text-right mt-4 md:mt-0">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-stone-400">Workshop Standard</span>
+            </div>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
             
-            <div class="lg:col-span-1 space-y-6">
-                <section class="bg-white p-6 shadow-sm border border-stone-200 card">
-                    <h2 class="font-bold text-stone-700 mb-4 border-b pb-2 uppercase text-sm italic">1. Project Specs</h2>
+            <div class="lg:col-span-4 space-y-6">
+                <section class="bg-white p-6 shadow-md card border-t-4 border-stone-800">
+                    <h2 class="font-black text-xs uppercase tracking-widest text-stone-400 mb-6">Plate Configuration</h2>
                     
-                    <label class="block text-xs font-semibold mb-1">Instrument</label>
-                    <select id="instrument" class="w-full p-2 bg-stone-100 border border-stone-300 mb-4 input-focus" onchange="updateTargets()">
+                    <label class="block text-xs font-bold mb-2">INSTRUMENT MODEL</label>
+                    <select id="instrument" class="w-full p-3 bg-stone-50 border border-stone-200 mb-6 input-focus font-bold" onchange="updateTargets()">
                         <optgroup label="Bowed Strings">
                             <option value="violin">Violin (Strad)</option>
                             <option value="viola">Viola (16")</option>
@@ -41,76 +46,97 @@
                         </optgroup>
                     </select>
 
-                    <label class="block text-xs font-semibold mb-1">Plate Type</label>
-                    <div class="grid grid-cols-2 gap-2 mb-4">
-                        <button id="btnFront" onclick="setPlate('front')" class="p-2 text-sm font-bold border bg-amber-900 text-white rounded">FRONT</button>
-                        <button id="btnBack" onclick="setPlate('back')" class="p-2 text-sm font-bold border bg-stone-200 text-stone-700 rounded">BACK</button>
+                    <div class="grid grid-cols-2 gap-2 mb-6">
+                        <button id="btnFront" onclick="setPlate('front')" class="py-3 text-xs font-black border-2 border-stone-800 bg-stone-800 text-white rounded">FRONT</button>
+                        <button id="btnBack" onclick="setPlate('back')" class="py-3 text-xs font-black border-2 border-stone-300 text-stone-400 rounded">BACK</button>
                     </div>
 
-                    <div id="guitarStateContainer" class="hidden">
-                        <label class="block text-xs font-semibold mb-1">Construction State</label>
-                        <select id="state" class="w-full p-2 bg-stone-100 border border-stone-300 mb-4 input-focus" onchange="updateTargets()">
-                            <option value="raw">Raw Plate (No Braces)</option>
-                            <option value="braced">Braced Plate (Ready for glue)</option>
+                    <div id="guitarStateContainer" class="hidden animate-pulse">
+                        <label class="block text-[10px] font-black mb-2 text-amber-700 uppercase">Bracing Status</label>
+                        <select id="state" class="w-full p-3 bg-amber-50 border border-amber-200 mb-6 input-focus font-bold text-amber-900" onchange="updateTargets()">
+                            <option value="raw">Raw Plate (Graduated)</option>
+                            <option value="braced">Fully Braced (Final Tuned)</option>
                         </select>
                     </div>
 
-                    <label class="block text-xs font-semibold mb-1">Wood Density (g/cm³)</label>
-                    <input type="number" id="density" value="0.37" step="0.01" class="w-full p-2 bg-stone-100 border border-stone-300 input-focus" oninput="updateTargets()">
-                    <p class="text-[10px] text-stone-500 mt-1">Typical: Spruce 0.35-0.45 | Maple 0.55-0.65</p>
+                    <label class="block text-xs font-bold mb-2 uppercase">Measured Density (ρ)</label>
+                    <input type="number" id="density" value="0.37" step="0.01" class="w-full p-3 bg-stone-50 border border-stone-200 font-mono font-bold input-focus" oninput="updateTargets()">
                 </section>
 
-                <section class="bg-white p-6 shadow-sm border border-stone-200 card">
-                    <h2 class="font-bold text-stone-700 mb-4 border-b pb-2 uppercase text-sm italic">2. Current Workbench Data</h2>
-                    <label class="block text-xs font-semibold mb-1">Current Mass (g)</label>
-                    <input type="number" id="currMass" placeholder="Weight of plate" class="w-full p-2 bg-stone-100 border border-stone-300 mb-4 input-focus" oninput="updateTargets()">
+                <section class="bg-white p-6 shadow-md card border-t-4 border-stone-800">
+                    <h2 class="font-black text-xs uppercase tracking-widest text-stone-400 mb-6">Workbench Measurements</h2>
+                    <label class="block text-xs font-bold mb-2">CURRENT MASS (g)</label>
+                    <input type="number" id="currMass" placeholder="0.0" class="w-full p-3 bg-stone-50 border border-stone-200 mb-6 font-mono font-bold input-focus text-xl" oninput="updateTargets()">
                     
-                    <label class="block text-xs font-semibold mb-1">Current Resonance (Hz)</label>
-                    <input type="number" id="currFreq" placeholder="M5 or M4 frequency" class="w-full p-2 bg-stone-100 border border-stone-300 input-focus" oninput="updateTargets()">
+                    <label class="block text-xs font-bold mb-2">MEASURED FREQUENCY (Hz)</label>
+                    <input type="number" id="currFreq" placeholder="0" class="w-full p-3 bg-stone-50 border border-stone-200 font-mono font-bold input-focus text-xl" oninput="updateTargets()">
                 </section>
             </div>
 
-            <div class="lg:col-span-2 space-y-6">
+            <div class="lg:col-span-8 space-y-8">
                 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div class="bg-amber-900 text-white p-6 card shadow-lg">
-                        <span class="text-xs uppercase opacity-75 tracking-wider">Target Mass Range</span>
-                        <div id="targetMass" class="text-4xl font-mono mt-2 font-bold">--</div>
-                        <div id="massLogic" class="text-[10px] mt-2 opacity-80 uppercase tracking-tighter">Adjusted for Density</div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div class="bg-white border-b-8 border-amber-800 p-8 card shadow-xl">
+                        <span class="text-xs font-black uppercase text-stone-400 tracking-widest">Precision Target Mass</span>
+                        <div id="targetMass" class="text-5xl font-mono mt-4 font-black text-stone-800">--</div>
+                        <div class="text-[10px] mt-4 font-bold text-amber-800 uppercase italic">Ideal Mass for current density</div>
                     </div>
-                    <div class="bg-stone-800 text-white p-6 card shadow-lg">
-                        <span class="text-xs uppercase opacity-75 tracking-wider">Target Frequency</span>
-                        <div id="targetFreq" class="text-4xl font-mono mt-2 font-bold">--</div>
-                        <div id="freqLogic" class="text-[10px] mt-2 opacity-80 uppercase tracking-tighter">System Resonance</div>
+                    <div class="bg-white border-b-8 border-stone-800 p-8 card shadow-xl">
+                        <span class="text-xs font-black uppercase text-stone-400 tracking-widest">Target Frequency</span>
+                        <div id="targetFreq" class="text-5xl font-mono mt-4 font-black text-stone-800">--</div>
+                        <div id="freqLabel" class="text-[10px] mt-4 font-bold text-stone-500 uppercase italic">Awaiting Mode...</div>
                     </div>
                 </div>
 
-                <section id="analysisSection" class="bg-white p-8 border border-stone-200 card shadow-sm hidden">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="font-bold text-xl text-stone-800 italic underline decoration-amber-500">The Rational Diagnosis</h2>
-                        <div id="efficiencyTag" class="px-3 py-1 bg-stone-100 text-[10px] font-bold rounded">EFFICIENCY: --</div>
+                <section id="analysisSection" class="bg-stone-800 text-stone-100 p-10 card shadow-2xl hidden">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                        <h2 class="font-black text-2xl uppercase italic tracking-tighter">Rational Diagnosis</h2>
+                        <div id="efficiencyTag" class="px-6 py-2 bg-white text-stone-900 font-black text-lg rounded-full">--</div>
                     </div>
                     
-                    <div id="diagnosisMessage" class="p-6 rounded-lg mb-6 text-sm border-l-4"></div>
+                    <div id="diagnosisMessage" class="text-lg font-medium leading-relaxed mb-10 pb-6 border-b border-stone-700"></div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
                         <div>
-                            <h3 class="font-bold text-[10px] uppercase text-amber-700 mb-3 tracking-widest">Stiffness Efficiency (%)</h3>
-                            <div class="w-full bg-stone-200 h-6 rounded-sm overflow-hidden border border-stone-300">
-                                <div id="efficiencyBar" class="bg-amber-600 h-full transition-all duration-500" style="width: 0%"></div>
+                            <h3 class="font-black text-[10px] uppercase text-amber-500 mb-4 tracking-widest">Efficiency Threshold</h3>
+                            <div class="w-full bg-stone-700 h-4 rounded-full overflow-hidden mb-2">
+                                <div id="efficiencyBar" class="bg-amber-500 h-full transition-all duration-700" style="width: 0%"></div>
+                            </div>
+                            <div class="flex justify-between text-[10px] font-bold text-stone-500">
+                                <span>LOW ENERGY</span>
+                                <span>OPTIMAL ZONE (±2%)</span>
+                                <span>OVER-STIFF</span>
                             </div>
                         </div>
                         <div>
-                            <h3 class="font-bold text-[10px] uppercase text-amber-700 mb-3 tracking-widest">Next Workshop Steps</h3>
-                            <ul id="actionList" class="text-xs space-y-2 list-none text-stone-600"></ul>
+                            <h3 class="font-black text-[10px] uppercase text-amber-500 mb-4 tracking-widest">Precision Corrections</h3>
+                            <ul id="actionList" class="text-sm space-y-3 font-medium text-stone-300"></ul>
                         </div>
                     </div>
                 </section>
 
-                <div id="placeholder" class="bg-stone-100 border-2 border-dashed border-stone-300 p-16 text-center text-stone-400 rounded-xl">
-                    <p class="text-lg">Awaiting workbench data...</p>
-                    <p class="text-xs mt-2 uppercase tracking-widest">Input mass and frequency to run analysis</p>
+                <div id="placeholder" class="bg-white border-2 border-dashed border-stone-300 p-20 text-center text-stone-400 rounded-xl shadow-inner">
+                    <p class="text-xl font-bold uppercase tracking-widest">Awaiting Physical Data</p>
+                    <p class="text-xs mt-4">Calculations will be performed against the master scaling laws.</p>
                 </div>
+
+                <section class="mt-16 border-t border-stone-300 pt-10">
+                    <h2 class="text-xs font-black text-stone-400 uppercase tracking-widest mb-8">Master Documentation: Modal Logic</h2>
+                    <div class="mode-doc-grid">
+                        <div class="bg-white p-6 rounded border border-stone-200">
+                            <h4 class="font-bold text-amber-800 text-sm mb-2">Mode 2 (Cross-Grain)</h4>
+                            <p class="text-xs text-stone-600 leading-relaxed">Used for <strong>Raw Guitar Plates</strong>. Measures the stiffness of the 'flaps'. If density is high but M2 is low, the plate is too thin at the edges.</p>
+                        </div>
+                        <div class="bg-white p-6 rounded border border-stone-200">
+                            <h4 class="font-bold text-amber-800 text-sm mb-2">Mode 4 (Longitudinal)</h4>
+                            <p class="text-xs text-stone-600 leading-relaxed">The primary resonance for <strong>Braced Guitar Fronts</strong>. Reflects the structural synergy between the soundboard and the bracing system.</p>
+                        </div>
+                        <div class="bg-white p-6 rounded border border-stone-200">
+                            <h4 class="font-bold text-amber-800 text-sm mb-2">Mode 5 (The Ring Mode)</h4>
+                            <p class="text-xs text-stone-600 leading-relaxed">The 'Golden Standard' for <strong>Violin Family</strong> fronts and backs. Balancing M5 ensures the arching and graduations are working in harmony.</p>
+                        </div>
+                    </div>
+                </section>
             </div>
         </div>
     </div>
@@ -118,7 +144,6 @@
     <script>
         let currentPlate = 'front';
 
-        // Expanded Master Data Library (Ref Density for Spruce=0.37, Maple=0.58, Rosewood=0.80)
         const library = {
             violin: {
                 front: { refMass: 65, refFreq: 335, refDensity: 0.37, mode: 'M5' },
@@ -158,16 +183,14 @@
 
         function setPlate(type) {
             currentPlate = type;
-            document.getElementById('btnFront').className = type === 'front' ? 'p-2 text-sm font-bold border bg-amber-900 text-white rounded' : 'p-2 text-sm font-bold border bg-stone-200 text-stone-700 rounded';
-            document.getElementById('btnBack').className = type === 'back' ? 'p-2 text-sm font-bold border bg-amber-900 text-white rounded' : 'p-2 text-sm font-bold border bg-stone-200 text-stone-700 rounded';
+            document.getElementById('btnFront').className = type === 'front' ? 'py-3 text-xs font-black border-2 border-stone-800 bg-stone-800 text-white rounded' : 'py-3 text-xs font-black border-2 border-stone-300 text-stone-400 rounded';
+            document.getElementById('btnBack').className = type === 'back' ? 'py-3 text-xs font-black border-2 border-stone-800 bg-stone-800 text-white rounded' : 'py-3 text-xs font-black border-2 border-stone-300 text-stone-400 rounded';
             
-            // Set default density when switching
             if (type === 'back' && document.getElementById('density').value == 0.37) {
                 document.getElementById('density').value = 0.58;
             } else if (type === 'front' && document.getElementById('density').value == 0.58) {
                 document.getElementById('density').value = 0.37;
             }
-            
             updateTargets();
         }
 
@@ -188,22 +211,21 @@
                 ref = library[instKey][currentPlate];
             }
 
-            // Calculations
-            let targetMass = ref.refMass * (density / ref.refDensity);
-            let targetFreq = ref.refFreq * Math.sqrt(ref.refDensity / density);
+            let tM = ref.refMass * (density / ref.refDensity);
+            let tF = ref.refFreq * Math.sqrt(ref.refDensity / density);
 
-            document.getElementById('targetMass').innerText = targetMass.toFixed(1) + 'g';
-            document.getElementById('targetFreq').innerText = targetFreq.toFixed(0) + 'Hz';
-            document.getElementById('freqLogic').innerText = `Target ${ref.mode} Resonance`;
+            document.getElementById('targetMass').innerText = tM.toFixed(1) + 'g';
+            document.getElementById('targetFreq').innerText = tF.toFixed(0) + 'Hz';
+            document.getElementById('freqLabel').innerText = `Ideal ${ref.mode} Frequency`;
 
             if (currMass && currFreq) {
                 document.getElementById('analysisSection').classList.remove('hidden');
                 document.getElementById('placeholder').classList.add('hidden');
-                runDoctor(currMass, currFreq, targetMass, targetFreq, ref);
+                runDoctor(currMass, currFreq, tM, tF);
             }
         }
 
-        function runDoctor(cM, cF, tM, tF, ref) {
+        function runDoctor(cM, cF, tM, tF) {
             const diagBox = document.getElementById('diagnosisMessage');
             const actionList = document.getElementById('actionList');
             const effBar = document.getElementById('efficiencyBar');
@@ -211,34 +233,26 @@
             
             actionList.innerHTML = "";
             let efficiency = (cF / cM) / (tF / tM);
-            let effPercent = Math.min(Math.max(efficiency * 100, 0), 100);
+            let effPercent = Math.round(efficiency * 100);
             effBar.style.width = effPercent + "%";
-            effTag.innerText = "EFFICIENCY: " + Math.round(effPercent) + "%";
+            effTag.innerText = effPercent + "% EFFICIENCY";
 
-            if (cM > tM * 1.05 && cF < tF * 0.98) {
-                diagBox.className = "p-6 rounded-lg mb-6 text-sm bg-red-50 text-red-800 border-l-4 border-red-500";
-                diagBox.innerHTML = "<strong>CRITICAL:</strong> High Mass / Low Stiffness. The plate is over-damped.";
-                actionList.innerHTML += "<li>• Significant weight reduction required in lungs/periphery.</li>";
-                actionList.innerHTML += "<li>• Check arching recurve for excess thickness.</li>";
-            } else if (cM > tM) {
-                diagBox.className = "p-6 rounded-lg mb-6 text-sm bg-amber-50 text-amber-800 border-l-4 border-amber-500";
-                diagBox.innerHTML = "<strong>HEAVY:</strong> Stiff enough, but too massive. Response will be slow.";
-                actionList.innerHTML += "<li>• Refine graduations toward the edges.</li>";
-                actionList.innerHTML += "<li>• Check the weight of the scroll/neck block if integrated.</li>";
-            } else if (cF < tF) {
-                diagBox.className = "p-6 rounded-lg mb-6 text-sm bg-blue-50 text-blue-800 border-l-4 border-blue-500";
-                diagBox.innerHTML = "<strong>FLOOPY:</strong> Mass is good, but stiffness is lacking.";
-                actionList.innerHTML += "<li>• STOP thinning immediately.</li>";
-                actionList.innerHTML += "<li>• For Guitars: Braces may need more height (not width).</li>";
+            // Narrow Tolerance Logic: Optimal is strictly 98% - 102%
+            if (effPercent >= 98 && effPercent <= 102) {
+                diagBox.innerHTML = "STATUS: <span class='text-green-400'>OPTIMAL CALIBRATION</span>. The plate has reached the Rational Peak. Further wood removal will degrade structural integrity.";
+                actionList.innerHTML = "<li>• Stop all thicknessing.</li><li>• Proceed to final surface preparation.</li><li>• Record measurements for workshop archives.</li>";
+            } else if (effPercent < 98) {
+                diagBox.innerHTML = "STATUS: <span class='text-amber-400'>LOW ENERGY</span>. The plate is over-damped. The mass is high relative to the stiffness.";
+                if (cM > tM) {
+                    actionList.innerHTML = "<li>• Reduce weight in the 'Lungs' and recurve.</li><li>• Target a 0.2mm reduction across the perimeter.</li>";
+                } else {
+                    actionList.innerHTML = "<li>• Wood stiffness is lower than reference.</li><li>• For guitar: Braces need more height.</li><li>• For bowed: Verify arching height.</li>";
+                }
             } else {
-                diagBox.className = "p-6 rounded-lg mb-6 text-sm bg-green-50 text-green-800 border-l-4 border-green-500";
-                diagBox.innerHTML = "<strong>RATIONAL PEAK:</strong> Excellent stiffness-to-mass ratio.";
-                actionList.innerHTML += "<li>• Maintain this balance during final scraping.</li>";
+                diagBox.innerHTML = "STATUS: <span class='text-blue-400'>HIGH TENSION</span>. The plate is over-stiff. The instrument may sound brittle or lacks fundamental depth.";
+                actionList.innerHTML = "<li>• Reduce thickness in the center 'Spine'.</li><li>• For guitar: Scallop the brace ends more aggressively.</li>";
             }
         }
-
-        // Initialize
-        updateTargets();
     </script>
 </body>
 </html>
