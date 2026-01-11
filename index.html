@@ -3,138 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rational Luthier Assistant v3.2</title>
+    <title>Rational Luthier v3.3</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
     <style>
-        .card { border-radius: 12px; transition: all 0.3s ease; border: 1px solid #e7e5e4; }
-        .input-focus:focus { outline: 2px solid #78350f; border-color: transparent; }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 50; align-items: center; justify-content: center; }
-        .chladni-node { width: 12px; height: 12px; background: #fbbf24; border-radius: 50%; display: inline-block; margin-right: 4px; }
+        body { font-family: 'Inter', sans-serif; transition: all 0.3s ease; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .glass-card { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 4px; }
+        .input-minimal { border-bottom: 2px solid #e5e7eb; transition: border-color 0.2s; }
+        .input-minimal:focus { border-color: #d97706; outline: none; }
+        .sidebar { border-right: 1px solid #e5e7eb; }
+        @media (max-width: 1024px) { .sidebar { border-right: none; border-bottom: 1px solid #e5e7eb; } }
     </style>
 </head>
-<body class="bg-stone-50 text-stone-900 font-sans p-4 md:p-12">
+<body class="bg-stone-50 text-zinc-900">
 
-    <div class="max-w-7xl mx-auto">
-        <header class="mb-10 border-b-4 border-stone-800 pb-6 flex flex-col md:flex-row justify-between items-end">
+    <div class="flex flex-col lg:flex-row min-h-screen">
+        
+        <aside class="lg:w-96 bg-white p-8 sidebar space-y-10">
             <div>
-                <h1 class="text-5xl font-black text-stone-800 tracking-tighter italic">RATIONAL LUTHIER <span class="text-amber-800 uppercase">v3.2</span></h1>
-                <p class="text-stone-500 font-bold uppercase tracking-widest text-sm mt-2">Precision Workshop Suite • Visual Reference Integrated</p>
+                <h1 class="text-3xl font-black tracking-tighter italic mb-1 uppercase">Rational <span class="text-amber-600">Luthier</span></h1>
+                <p class="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em]">Workshop Studio v3.3</p>
             </div>
-            <div class="flex flex-wrap gap-2 no-print mt-4 md:mt-0">
-                <button onclick="saveToLog()" class="bg-amber-800 text-white px-5 py-3 rounded-lg font-black text-xs uppercase hover:bg-amber-900 transition shadow-md">Record Measurement</button>
-                <button onclick="toggleVisuals()" class="bg-blue-800 text-white px-5 py-3 rounded-lg font-black text-xs uppercase hover:bg-blue-900 transition shadow-md">Chladni Guide</button>
-                <button onclick="exportReport()" class="bg-stone-800 text-white px-5 py-3 rounded-lg font-black text-xs uppercase hover:bg-black transition shadow-md">Export JSON</button>
-            </div>
-        </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            
-            <div class="lg:col-span-4 space-y-6">
-                <section class="bg-white p-6 shadow-sm card border-t-8 border-stone-800">
-                    <h2 class="text-xs font-black uppercase tracking-widest text-stone-400 mb-6">1. Configuration</h2>
-                    
-                    <label class="block text-[10px] font-black mb-1 uppercase text-stone-500">Model</label>
-                    <select id="instrument" class="w-full p-3 bg-stone-50 border border-stone-200 mb-4 font-bold" onchange="initProjectUI()">
-                        <optgroup label="Bowed">
+            <section class="space-y-6">
+                <div>
+                    <label class="text-[11px] font-black uppercase text-zinc-400 tracking-widest block mb-2">Instrument Architecture</label>
+                    <select id="instrument" class="w-full bg-stone-100 p-3 font-bold text-sm rounded cursor-pointer" onchange="initProjectUI()">
+                        <optgroup label="Violin Family">
                             <option value="violin">Violin (Stradivari)</option>
                             <option value="viola">Viola (16")</option>
-                            <option value="cello">Cello (Strad B)</option>
+                            <option value="cello">Cello (75.5cm)</option>
                             <option value="bass_violin">Bass Violin (Borbon)</option>
+                        </optgroup>
+                        <optgroup label="Early Music">
                             <option value="viol_jaye">Bass Viol (Jaye)</option>
                             <option value="viol_colichon">Bass Viol (Colichon)</option>
                         </optgroup>
-                        <optgroup label="Plucked">
+                        <optgroup label="Lutherie Plucked">
                             <option value="classical_hauser">Classical (Hauser)</option>
                             <option value="steel_string_om">Steel String (OM)</option>
                         </optgroup>
                     </select>
+                </div>
 
-                    <div class="grid grid-cols-2 gap-2 mb-4">
-                        <button id="btnFront" onclick="setPlate('front')" class="py-3 text-xs font-black border-2 border-stone-800 bg-stone-800 text-white rounded-lg">FRONT</button>
-                        <button id="btnBack" onclick="setPlate('back')" class="py-3 text-xs font-black border-2 border-stone-200 text-stone-400 rounded-lg">BACK</button>
-                    </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="btnFront" onclick="setPlate('front')" class="py-2 text-[10px] font-black rounded border-2 border-zinc-900 bg-zinc-900 text-white transition">FRONT</button>
+                    <button id="btnBack" onclick="setPlate('back')" class="py-2 text-[10px] font-black rounded border-2 border-stone-200 text-zinc-400 hover:border-zinc-900 transition">BACK</button>
+                </div>
 
-                    <div id="archingContainer">
-                        <label class="block text-[10px] font-black mb-1 uppercase text-stone-500">Arching Architecture</label>
-                        <select id="arching" class="w-full p-3 bg-stone-50 border border-stone-200 mb-4 font-bold" onchange="calculate()">
-                            <option value="flat">Standard (Stradivari Style)</option>
-                            <option value="high">High Arch (Stainer Style)</option>
-                        </select>
-                    </div>
-
-                    <label class="block text-[10px] font-black mb-1 uppercase text-stone-500">Construction Phase</label>
-                    <select id="step" class="w-full p-3 bg-amber-50 border border-amber-200 font-bold text-amber-900" onchange="calculate()">
+                <div id="archingContainer">
+                    <label class="text-[11px] font-black uppercase text-zinc-400 tracking-widest block mb-2">Arching Profile</label>
+                    <select id="arching" class="w-full bg-stone-100 p-3 font-bold text-sm rounded cursor-pointer" onchange="calculate()">
+                        <option value="flat">Standard (Low/Flat)</option>
+                        <option value="high">High (Stainer/Amati)</option>
                     </select>
-                </section>
-
-                <section class="bg-white p-6 shadow-sm card border-t-8 border-amber-800">
-                    <h2 class="text-xs font-black uppercase tracking-widest text-stone-400 mb-6">2. Material Physics</h2>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-[10px] font-black mb-1 uppercase text-stone-500 italic">Density (ρ)</label>
-                            <input type="number" id="density" value="0.37" step="0.01" class="w-full p-3 bg-stone-50 border border-stone-200 font-mono font-bold text-xl" oninput="calculate()">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-black mb-1 uppercase text-stone-500 italic">Sound Speed (m/s)</label>
-                            <input type="number" id="speed" placeholder="Optional" class="w-full p-3 bg-stone-50 border border-stone-200 font-mono font-bold text-xl" oninput="calculate()">
-                        </div>
-                    </div>
-                </section>
-            </div>
-
-            <div class="lg:col-span-8 space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="bg-white p-5 shadow card border-b-8 border-amber-800 text-center">
-                        <span class="text-[10px] font-black uppercase text-stone-400">Target Mass</span>
-                        <div id="targetMass" class="text-4xl font-mono font-black text-stone-800">--</div>
-                    </div>
-                    <div class="bg-white p-5 shadow card border-b-8 border-stone-800 text-center">
-                        <span id="targetModeLabel" class="text-[10px] font-black uppercase text-stone-400">Target Freq</span>
-                        <div id="targetFreq" class="text-4xl font-mono font-black text-stone-800">--</div>
-                    </div>
-                    <div class="bg-stone-100 p-5 shadow card border-b-8 border-stone-400 text-center">
-                        <span class="text-[10px] font-black uppercase text-stone-400">Est. Thickness</span>
-                        <div id="predictedThickness" class="text-4xl font-mono font-black text-stone-500">--</div>
-                    </div>
                 </div>
 
-                <section class="bg-stone-800 text-white p-8 card shadow-xl">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="font-black italic text-2xl uppercase tracking-tighter">Workbench Doctor</h2>
-                        <div id="efficiencyTag" class="px-6 py-2 bg-stone-700 text-white font-black text-xl rounded">--%</div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
-                        <div class="space-y-4">
-                            <input type="number" id="currMass" placeholder="Actual Mass (g)" class="w-full bg-stone-700 border-none p-4 font-mono text-2xl text-amber-400 rounded" oninput="diagnose()">
-                            <input type="number" id="currFreq" placeholder="Actual Freq (Hz)" class="w-full bg-stone-700 border-none p-4 font-mono text-2xl text-amber-400 rounded" oninput="diagnose()">
-                        </div>
-                        <div class="bg-stone-900/50 p-5 rounded">
-                            <div id="diagnosisBox" class="text-sm font-medium mb-4 text-stone-300">Enter data for directive...</div>
-                            <ul id="stepAction" class="space-y-2 text-xs font-bold text-amber-200 list-disc pl-4"></ul>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="bg-white p-5 shadow card">
-                    <h3 class="text-xs font-black uppercase text-stone-400 mb-4 tracking-widest italic">Workbench Log</h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-[11px]">
-                            <thead><tr class="border-b border-stone-200 text-stone-400 uppercase"><th class="py-2">Step</th><th>Mass</th><th>Freq</th><th>Eff%</th></tr></thead>
-                            <tbody id="historyBody" class="font-bold"></tbody>
-                        </table>
-                    </div>
-                </section>
-            </div>
-        </div>
-    </div>
-
-    <div id="visualModal" class="modal flex" onclick="toggleVisuals()">
-        <div class="bg-white p-10 max-w-2xl w-full mx-4 rounded-xl shadow-2xl" onclick="event.stopPropagation()">
-            <h2 id="modalTitle" class="text-2xl font-black italic mb-4 uppercase">Chladni Reference</h2>
-            <div id="modalContent" class="space-y-6">
+                <div>
+                    <label class="text-[11px] font-black uppercase text-zinc-400 tracking-widest block mb-2">Work Step</label>
+                    <select id="step" class="w-full bg-amber-50 p-3 font-black text-sm text-amber-900 rounded border border-amber-100" onchange="calculate()">
+                        </select>
                 </div>
-            <button onclick="toggleVisuals()" class="mt-8 w-full py-4 bg-stone-800 text-white font-black uppercase text-xs tracking-widest rounded">Return to Workshop</button>
-        </div>
+            </section>
+
+            <section class="pt-6 border-t border-stone-100 space-y-6">
+                <label class="text-[11px] font-black uppercase text-zinc-400 tracking-widest block">Material Physics</label>
+                <div>
+                    <span class="text-[10px] font-bold text-zinc-500 uppercase">Density (ρ)</span>
+                    <input type="number" id="density" value="0.37" step="0.01" class="w-full py-2 bg-transparent input-minimal mono text-xl font-bold" oninput="calculate()">
+                </div>
+                <div>
+                    <span class="text-[10px] font-bold text-zinc-500 uppercase">Speed of Sound (Optional)</span>
+                    <input type="number" id="speed" placeholder="m/s" class="w-full py-2 bg-transparent input-minimal mono text-xl font-bold" oninput="calculate()">
+                </div>
+            </section>
+        </aside>
+
+        <main class="flex-1 p-8 lg:p-16 space-y-12">
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="glass-card p-6 border-l-4 border-amber-600">
+                    <span class="text-[10px] font-black uppercase text-zinc-400 tracking-widest">Target Mass</span>
+                    <div id="targetMass" class="text-4xl font-black italic mono mt-2 text-zinc-800">--</div>
+                </div>
+                <div class="glass-card p-6 border-l-4 border-zinc-900">
+                    <span id="targetModeLabel" class="text-[10px] font-black uppercase text-zinc-400 tracking-widest">Target Freq</span>
+                    <div id="targetFreq" class="text-4xl font-black italic mono mt-2 text-zinc-800">--</div>
+                </div>
+                <div class="glass-card p-6 border-l-4 border-stone-300">
+                    <span class="text-[10px] font-black uppercase text-zinc-400 tracking-widest">Est. Thickness</span>
+                    <div id="predictedThickness" class="text-4xl font-black italic mono mt-2 text-stone-400">--</div>
+                </div>
+            </div>
+
+            <section class="bg-zinc-900 text-white rounded-lg p-10 shadow-2xl relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-8 opacity-10">
+                    <svg width="120" height="120" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
+                </div>
+                
+                <div class="flex justify-between items-center mb-10">
+                    <h2 class="text-2xl font-black italic uppercase tracking-tighter">The Rational Doctor</h2>
+                    <div id="efficiencyTag" class="text-4xl font-black mono text-amber-500">--%</div>
+                </div>
+
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-16">
+                    <div class="space-y-8">
+                        <div>
+                            <label class="text-[10px] font-black uppercase text-zinc-500 tracking-[0.2em] block mb-4">Workbench Inputs</label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <input type="number" id="currMass" placeholder="00.0" class="w-full bg-zinc-800 border-b-2 border-zinc-700 p-4 font-black text-3xl text-amber-500 mono rounded" oninput="diagnose()">
+                                    <span class="text-[10px] font-bold text-zinc-500 block mt-2 text-center uppercase">Grams (g)</span>
+                                </div>
+                                <div>
+                                    <input type="number" id="currFreq" placeholder="000" class="w-full bg-zinc-800 border-b-2 border-zinc-700 p-4 font-black text-3xl text-amber-500 mono rounded" oninput="diagnose()">
+                                    <span class="text-[10px] font-bold text-zinc-500 block mt-2 text-center uppercase">Hertz (Hz)</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="saveToLog()" class="w-full py-4 bg-zinc-100 text-zinc-900 font-black text-xs uppercase tracking-widest hover:bg-amber-500 hover:text-white transition">Commit to Log</button>
+                    </div>
+
+                    <div class="space-y-6">
+                        <label class="text-[10px] font-black uppercase text-zinc-500 tracking-[0.2em] block">Active Directives</label>
+                        <div id="diagnosisBox" class="text-lg font-medium text-zinc-300 leading-relaxed border-l-2 border-amber-600 pl-6 italic">
+                            Waiting for workbench data...
+                        </div>
+                        <div id="componentAdvice" class="bg-zinc-800/50 p-6 rounded text-sm text-stone-300 space-y-4">
+                            </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="space-y-4">
+                <div class="flex justify-between items-end">
+                    <h3 class="text-xs font-black uppercase text-zinc-400 tracking-[0.3em]">History Log</h3>
+                    <button onclick="exportReport()" class="text-[10px] font-bold uppercase text-amber-600 hover:underline">Download Workshop Data (.json)</button>
+                </div>
+                <div class="overflow-hidden glass-card">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-stone-100 text-[10px] uppercase font-black text-zinc-500">
+                            <tr>
+                                <th class="px-6 py-4">Phase</th>
+                                <th class="px-6 py-4">Mass (g)</th>
+                                <th class="px-6 py-4">Freq (Hz)</th>
+                                <th class="px-6 py-4">Efficiency</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyBody" class="divide-y divide-stone-100 mono">
+                            </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
     </div>
 
     <script>
@@ -160,19 +182,19 @@
 
             if (currentPlate === 'front') {
                 stepSel.innerHTML = (inst.includes('hauser') || inst.includes('om')) ? 
-                    `<option value="f_raw">Raw Plate</option><option value="f_holes">Soundhole Cut</option><option value="f_braced">Braced & Finished</option>` :
+                    `<option value="f_raw">Raw Plate</option><option value="f_holes">Soundhole Cut</option><option value="f_braced">Bracing Phase</option>` :
                     (inst.includes('viol_')) ? `<option value="f_raw">Plate Graduation</option>` :
-                    `<option value="f_raw">Raw Plate</option><option value="f_holes">F-Holes Cut</option><option value="f_barred">Bass Bar Fitted</option>`;
+                    `<option value="f_raw">Raw Plate</option><option value="f_holes">F-Holes Cut</option><option value="f_barred">Bass Bar Phase</option>`;
             } else {
-                stepSel.innerHTML = `<option value="back">Final Graduation</option>`;
+                stepSel.innerHTML = `<option value="back">Final Back Graduation</option>`;
             }
             calculate();
         }
 
         function setPlate(type) {
             currentPlate = type;
-            document.getElementById('btnFront').className = type === 'front' ? 'py-3 text-xs font-black border-2 border-stone-800 bg-stone-800 text-white rounded-lg' : 'py-3 text-xs font-black border-2 border-stone-200 text-stone-400 rounded-lg';
-            document.getElementById('btnBack').className = type === 'back' ? 'py-3 text-xs font-black border-2 border-stone-800 bg-stone-800 text-white rounded-lg' : 'py-3 text-xs font-black border-2 border-stone-200 text-stone-400 rounded-lg';
+            document.getElementById('btnFront').className = type === 'front' ? 'py-2 text-[10px] font-black rounded border-2 border-zinc-900 bg-zinc-900 text-white transition' : 'py-2 text-[10px] font-black rounded border-2 border-stone-200 text-zinc-400 hover:border-zinc-900 transition';
+            document.getElementById('btnBack').className = type === 'back' ? 'py-2 text-[10px] font-black rounded border-2 border-zinc-900 bg-zinc-900 text-white transition' : 'py-2 text-[10px] font-black rounded border-2 border-stone-200 text-zinc-400 hover:border-zinc-900 transition';
             initProjectUI();
         }
 
@@ -191,9 +213,29 @@
             
             document.getElementById('targetMass').innerText = Math.round(tM) + 'g';
             document.getElementById('targetFreq').innerText = Math.round(tF) + 'Hz';
-            document.getElementById('predictedThickness').innerText = (ref.t * (ref.d / dens)).toFixed(2) + 'mm';
+            document.getElementById('predictedThickness').innerText = (ref.t * (ref.d / dens)).toFixed(1) + 'mm';
             document.getElementById('targetModeLabel').innerText = `Target Freq (${ref.mode})`;
+            updateDoctorAdvice();
             diagnose();
+        }
+
+        function updateDoctorAdvice() {
+            const inst = document.getElementById('instrument').value;
+            const step = document.getElementById('step').value;
+            const adviceDiv = document.getElementById('componentAdvice');
+            
+            let text = "";
+            if (step === 'f_barred' || step === 'f_braced') {
+                if (inst === 'violin') text = "<b>Bass Bar Directives:</b> Length 270mm. Width 5.5mm. Max height 11mm. Weight target: 3.5g - 4.5g.";
+                else if (inst === 'cello') text = "<b>Bass Bar Directives:</b> Length 580mm. Width 10.5mm. Max height 26mm. Weight target: 22g - 28g.";
+                else if (inst.includes('hauser')) text = "<b>Bracing Directives:</b> Focus on the Fan. Seven braces, thickness 3mm, height 4mm at center. Taper ends to zero.";
+                else if (inst.includes('om')) text = "<b>X-Bracing:</b> Maintain 19mm height at the lap joint. Scallop the tone bars to reach the target frequency.";
+            } else if (step === 'f_holes') {
+                text = "<b>F-Hole Warning:</b> Expect a significant drop in longitudinal stiffness. This step 'unlocks' the plate; do not thin further until f-holes are fully cut.";
+            } else {
+                text = "<b>Graduation Advice:</b> Maintain the 'central spine' at predicted thickness. Thin the upper and lower bouts (the lungs) to shed mass while preserving fundamental pitch.";
+            }
+            adviceDiv.innerHTML = text;
         }
 
         function diagnose() {
@@ -204,49 +246,14 @@
             if (!cM || !cF) return;
             const eff = Math.round(((cF / cM) / (tF / tM)) * 100);
             const box = document.getElementById('diagnosisBox');
-            const action = document.getElementById('stepAction');
             document.getElementById('efficiencyTag').innerText = eff + "%";
 
             if (eff >= 98 && eff <= 102) {
-                box.innerHTML = "<span class='text-green-500 font-black'>TARGET REACHED.</span> Plate is rationalized.";
-                action.innerHTML = "<li>Stop material removal.</li><li>Check tap tones for clarity.</li>";
+                box.innerHTML = "Rational peak detected. The plate resonance is perfectly coupled to the material mass. No further thinning recommended.";
             } else if (eff < 98) {
-                box.innerHTML = "<span class='text-amber-500 font-black'>DAMPED.</span> Excessive mass detected.";
-                action.innerHTML = "<li>Thin the lungs (upper/lower bouts).</li><li>Do not touch the spine.</li>";
+                box.innerHTML = "The plate is currently Damped. You have excess mass that isn't providing stiffness. Focus on thinning the peripheral regions (the lungs).";
             } else {
-                box.innerHTML = "<span class='text-blue-500 font-black'>STIFF.</span> High tension/low mass.";
-                action.innerHTML = "<li>Thin the central spine.</li><li>Check arching blend.</li>";
-            }
-        }
-
-        function toggleVisuals() {
-            const modal = document.getElementById('visualModal');
-            const content = document.getElementById('modalContent');
-            const inst = document.getElementById('instrument').value;
-            const step = document.getElementById('step').value;
-            const ref = library[inst][step] || library[inst].back;
-
-            if (modal.style.display === 'flex') {
-                modal.style.display = 'none';
-            } else {
-                modal.style.display = 'flex';
-                let patternName = ref.mode;
-                content.innerHTML = `
-                    <div class="p-4 bg-stone-100 rounded border-l-4 border-amber-800">
-                        <h3 class="font-black text-lg uppercase">${patternName} Mode Guide</h3>
-                        <p class="text-sm text-stone-600 mt-2">Hold the plate firmly at the <span class="text-amber-800 font-bold">Node Points</span> (yellow) to excite the resonance.</p>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="border p-4 rounded text-center">
-                            <span class="block text-[10px] font-black uppercase text-stone-400">Holding Points</span>
-                            <p class="text-sm font-bold mt-2">${patternName === 'M5' ? 'At the 4 "corners" of the lung recurve' : 'Along the center cross-line'}</p>
-                        </div>
-                        <div class="border p-4 rounded text-center">
-                            <span class="block text-[10px] font-black uppercase text-stone-400">Visual Pattern</span>
-                            <p class="text-sm font-bold mt-2">${patternName === 'M5' ? 'The closed ring' : 'Two vertical nodal lines'}</p>
-                        </div>
-                    </div>
-                `;
+                box.innerHTML = "The plate is Over-Stiff. The frequency is too high for this mass. Thin the central spine or bridge area to allow for greater flexibility.";
             }
         }
 
@@ -257,19 +264,16 @@
                 freq: document.getElementById('currFreq').value,
                 eff: document.getElementById('efficiencyTag').innerText
             };
-            if(!log.mass || !log.freq) return alert("Enter workbench data.");
+            if(!log.mass || !log.freq) return;
             history.unshift(log);
             document.getElementById('historyBody').innerHTML = history.map(h => `
-                <tr class="border-b border-stone-100">
-                    <td class="py-2 text-amber-800 uppercase italic">${h.step.replace('f_', '')}</td>
-                    <td>${h.mass}g</td><td>${h.freq}Hz</td><td class="text-stone-900">${h.eff}</td>
+                <tr>
+                    <td class="px-6 py-4 uppercase font-bold text-zinc-400 text-[10px]">${h.step.replace('f_', '')}</td>
+                    <td class="px-6 py-4 font-bold text-amber-600">${h.mass}g</td>
+                    <td class="px-6 py-4 font-bold">${h.freq}Hz</td>
+                    <td class="px-6 py-4 text-zinc-400 italic">${h.eff}</td>
                 </tr>
             `).join('');
-        }
-
-        function exportReport() {
-            const blob = new Blob([JSON.stringify(history, null, 2)], {type: 'application/json'});
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Workshop_Log.json`; a.click();
         }
 
         initProjectUI();
