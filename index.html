@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rational Luthier v3.5</title>
+    <title>Rational Luthier v3.6</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
     <style>
@@ -23,7 +23,7 @@
         <aside class="lg:w-80 bg-white p-8 sidebar space-y-8">
             <header>
                 <h1 class="text-2xl font-black tracking-tighter italic uppercase">Rational <span class="text-amber-600">Luthier</span></h1>
-                <p class="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">Precision Workshop Suite v3.5</p>
+                <p class="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">Precision Workshop Suite v3.6</p>
             </header>
 
             <div class="space-y-6">
@@ -159,7 +159,7 @@
             viola: { f_raw: {m:95, f:265, d:0.38, c:5200, t:3.1, mode:'M5'}, f_holes: {m:92, f:250, d:0.38, c:5200, t:3.1, mode:'M5'}, f_barred: {m:102, f:305, d:0.38, c:5200, t:3.1, mode:'M5'}, back: {m:160, f:325, d:0.59, c:4100, t:4.8, mode:'M5'} },
             cello: { f_raw: {m:370, f:142, d:0.36, c:5100, t:5.2, mode:'M5'}, f_holes: {m:362, f:135, d:0.36, c:5100, t:5.2, mode:'M5'}, f_barred: {m:410, f:168, d:0.36, c:5100, t:5.2, mode:'M5'}, back: {m:650, f:185, d:0.61, c:4000, t:8.0, mode:'M5'} },
             bass_violin: { f_raw: {m:430, f:125, d:0.35, c:5000, t:6.5, mode:'M5'}, f_holes: {m:420, f:116, d:0.35, c:5000, t:6.5, mode:'M5'}, f_barred: {m:465, f:155, d:0.35, c:5000, t:6.5, mode:'M5'}, back: {m:860, f:180, d:0.61, c:4100, t:9.5, mode:'M5'} },
-            viol_jaye: { f_raw: {m:155, f:102, d:0.36, c:5300, t:2.5, mode:'M5'}, back: {m:240, f:110, d:0.62, c:4200, t:3.2, mode:'M5'} },
+            viol_jaye: { f_raw: {m:142, f:112, d:0.36, c:5300, t:2.3, mode:'M5'}, back: {m:220, f:124, d:0.62, c:4200, t:3.0, mode:'M5'} },
             viol_colichon: { f_raw: {m:205, f:85, d:0.36, c:5300, t:2.6, mode:'M5'}, back: {m:320, f:98, d:0.62, c:4200, t:3.5, mode:'M5'} },
             classical_hauser: { f_raw: {m:130, f:95, d:0.40, c:5500, t:2.4, mode:'M2'}, f_holes: {m:126, f:90, d:0.40, c:5500, t:2.4, mode:'M2'}, f_braced: {m:175, f:185, d:0.40, c:5500, t:2.4, mode:'M4'}, back: {m:210, f:220, d:0.82, c:4400, t:2.1, mode:'M5'} },
             steel_string_om: { f_raw: {m:145, f:102, d:0.43, c:5500, t:2.6, mode:'M2'}, f_holes: {m:141, f:96, d:0.43, c:5500, t:2.6, mode:'M2'}, f_braced: {m:210, f:205, d:0.43, c:5500, t:2.6, mode:'M4'}, back: {m:240, f:240, d:0.85, c:4400, t:2.3, mode:'M5'} }
@@ -227,10 +227,10 @@
             if (step === 'f_barred') {
                 const barH = (inst === 'violin') ? '11mm' : (inst === 'cello') ? '25mm' : (inst === 'bass_violin') ? '28mm' : '10mm';
                 advice.comp += `<br><br><b>Bass Bar Focus:</b> Ensure a maximum height of ${barH} at the bridge line. Taper the ends to 1.5mm to allow the plate to breathe.`;
-            } else if (inst.includes('viol_')) {
-                advice.comp += "<br><br><b>Viol Focus:</b> These instruments require ethereal lightness. Avoid Italian-style thickness; trust the tap tone more than structural bulk.";
-            } else if (step === 'f_holes') {
-                advice.comp += "<br><br><b>F-Hole Warning:</b> Cutting the holes significantly reduces longitudinal stiffness. Verify that the plate hasn't become too flexible before proceeding.";
+            } else if (inst.includes('viol_jaye')) {
+                advice.comp += "<br><br><b>Jaye Model Calibration:</b> With a 62cm body and 120mm ribs, this air box is compact. Aim for high response speed. The plate should feel extremely flexible in the hands.";
+            } else if (inst.includes('viol_colichon')) {
+                advice.comp += "<br><br><b>Colichon Model Focus:</b> 70cm bodies require ethereal lightness. Prioritize a clean, flute-like tap tone over structural bulk.";
             }
 
             return advice;
