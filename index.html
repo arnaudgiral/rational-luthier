@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rational Luthier Assistant v2.2</title>
+    <title>Rational Luthier Assistant v2.3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .card { border-radius: 8px; transition: all 0.2s ease; }
         .input-focus:focus { outline: 2px solid #92400e; border-color: transparent; }
-        .mode-doc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
         @media print { .no-print { display: none; } }
+        .history-row { animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body class="bg-stone-100 text-stone-900 font-sans p-4 md:p-10">
@@ -17,11 +18,11 @@
     <div class="max-w-6xl mx-auto">
         <header class="mb-12 border-b border-stone-300 pb-6 flex flex-col md:flex-row justify-between items-end">
             <div>
-                <h1 class="text-4xl font-black text-stone-800 tracking-tighter italic uppercase">Rational Luthier <span class="text-amber-700 underline">v2.2</span></h1>
-                <p class="text-stone-500 font-medium">Precision Workshop Suite • Structural Tuning & Data Export</p>
+                <h1 class="text-4xl font-black text-stone-800 tracking-tighter italic uppercase">Rational Luthier <span class="text-amber-700 underline">v2.3</span></h1>
+                <p class="text-stone-500 font-medium italic">Advanced Component Scaling & Multi-State Logic</p>
             </div>
-            <div class="text-right mt-4 md:mt-0 no-print">
-                <button onclick="exportData()" class="bg-amber-800 text-white px-6 py-2 rounded font-bold text-xs hover:bg-amber-900 transition uppercase tracking-widest">Export Portfolio Entry</button>
+            <div class="space-x-2 mt-4 md:mt-0 no-print">
+                <button onclick="exportData()" class="bg-amber-800 text-white px-4 py-2 rounded font-bold text-xs hover:bg-amber-900 transition uppercase">Export Report</button>
             </div>
         </header>
 
@@ -29,15 +30,15 @@
             
             <div class="lg:col-span-4 space-y-6 no-print">
                 <section class="bg-white p-6 shadow-md card border-t-4 border-stone-800">
-                    <h2 class="font-black text-xs uppercase tracking-widest text-stone-400 mb-6">Instrument Config</h2>
+                    <h2 class="font-black text-xs uppercase tracking-widest text-stone-400 mb-6 underline">1. Material & Model</h2>
                     
-                    <label class="block text-xs font-bold mb-2 uppercase">Model</label>
+                    <label class="block text-xs font-bold mb-2 uppercase">Instrument</label>
                     <select id="instrument" class="w-full p-3 bg-stone-50 border border-stone-200 mb-6 input-focus font-bold" onchange="updateTargets()">
                         <optgroup label="Bowed Strings">
                             <option value="violin">Violin (Strad)</option>
                             <option value="viola">Viola (16")</option>
                             <option value="cello">Cello (75.5cm)</option>
-                            <option value="bass_violin">Bass Violin (Borbon 80cm)</option>
+                            <option value="bass_violin">Bass Violin (80cm)</option>
                             <option value="viol_jaye">Bass Viol (Jaye)</option>
                             <option value="viol_colichon">Bass Viol (Colichon)</option>
                         </optgroup>
@@ -52,23 +53,27 @@
                         <button id="btnBack" onclick="setPlate('back')" class="py-3 text-xs font-black border-2 border-stone-300 text-stone-400 rounded">BACK</button>
                     </div>
 
-                    <div id="stateContainer" class="hidden">
-                        <label id="stateLabel" class="block text-[10px] font-black mb-2 text-amber-700 uppercase">Structural State</label>
-                        <select id="state" class="w-full p-3 bg-amber-50 border border-amber-200 mb-6 input-focus font-bold text-amber-900" onchange="updateTargets()">
-                            </select>
+                    <div id="stateContainer" class="hidden mb-6">
+                        <label class="block text-[10px] font-black mb-1 text-amber-700 uppercase">Structural State</label>
+                        <select id="state" class="w-full p-3 bg-amber-50 border border-amber-200 input-focus font-bold text-amber-900" onchange="updateTargets()">
+                        </select>
                     </div>
 
                     <label class="block text-xs font-bold mb-2 uppercase">Density (ρ)</label>
                     <input type="number" id="density" value="0.37" step="0.01" class="w-full p-3 bg-stone-50 border border-stone-200 font-mono font-bold input-focus" oninput="updateTargets()">
+                    <div id="densityHint" class="mt-2 p-2 bg-stone-100 text-[10px] text-stone-500 font-medium leading-tight rounded">
+                        </div>
                 </section>
 
                 <section class="bg-white p-6 shadow-md card border-t-4 border-stone-800">
-                    <h2 class="font-black text-xs uppercase tracking-widest text-stone-400 mb-6">Workbench Measurements</h2>
-                    <label class="block text-xs font-bold mb-2 uppercase">Current Mass (g)</label>
-                    <input type="number" id="currMass" placeholder="0.0" class="w-full p-3 bg-stone-50 border border-stone-200 mb-6 font-mono font-bold input-focus text-xl" oninput="updateTargets()">
+                    <h2 class="font-black text-xs uppercase tracking-widest text-stone-400 mb-6 underline">2. Workbench Input</h2>
+                    <label class="block text-xs font-bold mb-2">CURRENT MASS (g)</label>
+                    <input type="number" id="currMass" placeholder="0.0" class="w-full p-3 bg-stone-50 border border-stone-200 mb-6 font-mono font-bold input-focus text-xl">
                     
-                    <label class="block text-xs font-bold mb-2 uppercase">Frequency (Hz)</label>
-                    <input type="number" id="currFreq" placeholder="0" class="w-full p-3 bg-stone-50 border border-stone-200 font-mono font-bold input-focus text-xl" oninput="updateTargets()">
+                    <label class="block text-xs font-bold mb-2">FREQUENCY (Hz)</label>
+                    <input type="number" id="currFreq" placeholder="0" class="w-full p-3 bg-stone-50 border border-stone-200 mb-6 font-mono font-bold input-focus text-xl">
+                    
+                    <button onclick="processWorkbench()" class="w-full bg-stone-800 text-white py-3 font-bold text-xs uppercase tracking-widest hover:bg-black transition">Analyze & Log</button>
                 </section>
             </div>
 
@@ -87,47 +92,52 @@
 
                 <section id="analysisSection" class="bg-stone-800 text-stone-100 p-10 card shadow-2xl hidden">
                     <div class="flex justify-between items-center mb-8">
-                        <h2 class="font-black text-2xl uppercase italic tracking-tighter">Rational Diagnosis</h2>
+                        <h2 class="font-black text-2xl uppercase italic tracking-tighter">The Doctor's Analysis</h2>
                         <div id="efficiencyTag" class="px-6 py-2 bg-white text-stone-900 font-black text-lg rounded-full">--</div>
                     </div>
                     <div id="diagnosisMessage" class="text-lg font-medium leading-relaxed mb-10 pb-6 border-b border-stone-700"></div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
                         <div>
-                            <h3 class="font-black text-[10px] uppercase text-amber-500 mb-4 tracking-widest">Efficiency Range (±2% Tolerance)</h3>
+                            <h3 class="font-black text-[10px] uppercase text-amber-500 mb-4 tracking-widest">Efficiency Bar</h3>
                             <div class="w-full bg-stone-700 h-4 rounded-full overflow-hidden mb-2">
                                 <div id="efficiencyBar" class="bg-amber-500 h-full transition-all duration-700" style="width: 0%"></div>
                             </div>
                         </div>
                         <div>
-                            <h3 class="font-black text-[10px] uppercase text-amber-500 mb-4 tracking-widest">Required Adjustments</h3>
+                            <h3 class="font-black text-[10px] uppercase text-amber-500 mb-4 tracking-widest">Workshop Directives</h3>
                             <ul id="actionList" class="text-sm space-y-3 font-medium text-stone-300"></ul>
                         </div>
                     </div>
                 </section>
 
-                <div id="placeholder" class="bg-white border-2 border-dashed border-stone-300 p-20 text-center text-stone-400 rounded-xl">
-                    <p class="text-xl font-bold uppercase tracking-widest">Input Data to Begin Analysis</p>
-                </div>
-
-                <section class="mt-16 border-t border-stone-300 pt-10 no-print">
-                    <h2 class="text-xs font-black text-stone-400 uppercase tracking-widest mb-8">Rational Methodology</h2>
-                    <div class="mode-doc-grid">
-                        <div class="bg-white p-6 rounded border border-stone-200">
-                            <h4 class="font-bold text-amber-800 text-sm mb-2">Bowed: Bass Bar Shift</h4>
-                            <p class="text-xs text-stone-600">The Bass Bar should add stiffness (frequency) with minimal mass penalty. If the shift lowers efficiency, the bar is likely too heavy or poorly fitted.</p>
-                        </div>
-                        <div class="bg-white p-6 rounded border border-stone-200">
-                            <h4 class="font-bold text-amber-800 text-sm mb-2">Guitar: Bracing Shift</h4>
-                            <p class="text-xs text-stone-600">Switching from Raw to Braced shifts the primary resonance from M2 (cross) to M4 (longitudinal). Precision is critical in the scallop height.</p>
-                        </div>
-                    </div>
+                <section class="bg-white p-8 card shadow-md border border-stone-200">
+                    <h2 class="font-black text-xs uppercase tracking-widest text-stone-400 mb-6">Workbench History (Last 5 Logs)</h2>
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="border-b border-stone-200 text-stone-400 uppercase">
+                                <th class="py-2">Component</th>
+                                <th>Density</th>
+                                <th>Mass</th>
+                                <th>Freq</th>
+                                <th>Eff %</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyBody" class="text-stone-600 font-medium">
+                            </tbody>
+                    </table>
                 </section>
+
+                <div id="placeholder" class="bg-white border-2 border-dashed border-stone-300 p-20 text-center text-stone-400 rounded-xl">
+                    <p class="text-xl font-bold uppercase tracking-widest">Enter Data to Analyze Efficiency</p>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
         let currentPlate = 'front';
+        let history = [];
+
         const library = {
             violin: {
                 front_raw: { m: 62, f: 300, d: 0.37, mode: 'M5' },
@@ -148,97 +158,147 @@
                 front_raw: { m: 135, f: 100, d: 0.40, mode: 'M2' },
                 front_braced: { m: 175, f: 185, d: 0.40, mode: 'M4' },
                 back: { m: 210, f: 220, d: 0.80, mode: 'M5' }
+            },
+            steel_string: {
+                front_raw: { m: 150, f: 110, d: 0.42, mode: 'M2' },
+                front_braced: { m: 210, f: 205, d: 0.42, mode: 'M4' },
+                back: { m: 240, f: 240, d: 0.82, mode: 'M5' }
             }
-            // Logic repeats for other instruments...
         };
 
         function setPlate(type) {
             currentPlate = type;
+            const inst = document.getElementById('instrument').value;
+            const densityInput = document.getElementById('density');
+            
+            // UI Toggle
             document.getElementById('btnFront').className = type === 'front' ? 'py-3 text-xs font-black border-2 border-stone-800 bg-stone-800 text-white rounded' : 'py-3 text-xs font-black border-2 border-stone-300 text-stone-400 rounded';
             document.getElementById('btnBack').className = type === 'back' ? 'py-3 text-xs font-black border-2 border-stone-800 bg-stone-800 text-white rounded' : 'py-3 text-xs font-black border-2 border-stone-300 text-stone-400 rounded';
             
-            const inst = document.getElementById('instrument').value;
-            const stateCont = document.getElementById('stateContainer');
-            const stateSel = document.getElementById('state');
-
-            if(type === 'front') {
-                stateCont.classList.remove('hidden');
-                if(inst.includes('guitar')) {
-                    stateSel.innerHTML = '<option value="raw">Raw Plate</option><option value="braced">Braced</option>';
-                } else {
-                    stateSel.innerHTML = '<option value="raw">Raw (No Bar)</option><option value="barred">With Bass Bar</option>';
-                }
+            // Set Default Densities & Update Hints
+            if(type === 'back') {
+                densityInput.value = inst.includes('guitar') ? 0.82 : 0.58;
+                document.getElementById('stateContainer').classList.add('hidden');
             } else {
-                stateCont.classList.add('hidden');
+                densityInput.value = 0.37;
+                document.getElementById('stateContainer').classList.remove('hidden');
+                updateStateDropdown(inst);
             }
             updateTargets();
         }
 
+        function updateStateDropdown(inst) {
+            const stateSel = document.getElementById('state');
+            if(inst.includes('guitar')) {
+                stateSel.innerHTML = '<option value="raw">Raw Plate</option><option value="braced">Braced</option>';
+            } else {
+                stateSel.innerHTML = '<option value="raw">Raw (No Bar)</option><option value="barred">With Bass Bar</option>';
+            }
+        }
+
         function updateTargets() {
             const inst = document.getElementById('instrument').value;
-            const density = parseFloat(document.getElementById('density').value);
-            const cM = parseFloat(document.getElementById('currMass').value);
-            const cF = parseFloat(document.getElementById('currFreq').value);
+            const type = currentPlate;
+            const dens = parseFloat(document.getElementById('density').value);
+            const hint = document.getElementById('densityHint');
             
+            // Density Hint Logic
+            if(type === 'front') {
+                hint.innerHTML = "<strong>Range (Spruce/Cedar):</strong> 0.32 - 0.48 g/cm³";
+            } else {
+                hint.innerHTML = inst.includes('guitar') ? 
+                    "<strong>Range (Rosewood/Ebony):</strong> 0.75 - 1.10 g/cm³" : 
+                    "<strong>Range (Maple/Sycamore):</strong> 0.52 - 0.68 g/cm³";
+            }
+
             let ref;
-            if(currentPlate === 'front') {
+            if(type === 'front') {
                 const state = document.getElementById('state').value;
                 ref = library[inst][`front_${state}`];
             } else {
                 ref = library[inst].back;
             }
 
-            let tM = ref.m * (density / ref.d);
-            let tF = ref.f * Math.sqrt(ref.d / density);
+            const tM = ref.m * (dens / ref.d);
+            const tF = ref.f * Math.sqrt(ref.d / dens);
 
             document.getElementById('targetMass').innerText = tM.toFixed(1) + 'g';
             document.getElementById('targetFreq').innerText = tF.toFixed(0) + 'Hz';
             document.getElementById('freqTitle').innerText = `Target ${ref.mode}`;
-
-            if(cM && cF) {
-                document.getElementById('analysisSection').classList.remove('hidden');
-                document.getElementById('placeholder').classList.add('hidden');
-                runDoctor(cM, cF, tM, tF);
-            }
         }
 
-        function runDoctor(cM, cF, tM, tF) {
+        function processWorkbench() {
+            const cM = parseFloat(document.getElementById('currMass').value);
+            const cF = parseFloat(document.getElementById('currFreq').value);
+            const tM = parseFloat(document.getElementById('targetMass').innerText);
+            const tF = parseFloat(document.getElementById('targetFreq').innerText);
+
+            if(!cM || !cF) return alert("Enter mass and frequency first.");
+
+            document.getElementById('analysisSection').classList.remove('hidden');
+            document.getElementById('placeholder').classList.add('hidden');
+
+            const efficiency = Math.round(((cF / cM) / (tF / tM)) * 100);
+            
+            // Update UI
+            document.getElementById('efficiencyTag').innerText = efficiency + "% EFFICIENCY";
+            document.getElementById('efficiencyBar').style.width = efficiency + "%";
+            
             const diag = document.getElementById('diagnosisMessage');
             const actions = document.getElementById('actionList');
-            const effBar = document.getElementById('efficiencyBar');
-            const effTag = document.getElementById('efficiencyTag');
-            
-            let efficiency = Math.round(((cF / cM) / (tF / tM)) * 100);
-            effBar.style.width = efficiency + "%";
-            effTag.innerText = efficiency + "% EFFICIENCY";
 
             if(efficiency >= 98 && efficiency <= 102) {
-                diag.innerHTML = "<span class='text-green-400 font-bold'>RATIONAL PEAK.</span> Plate is optimized for the current wood density.";
-                actions.innerHTML = "<li>• Cease material removal.</li><li>• Prepare for assembly.</li>";
+                diag.innerHTML = "<span class='text-green-400 uppercase font-black'>Rational Target Reached.</span> Excellent balance of mass and tension.";
+                actions.innerHTML = "<li>• Cease all graduation.</li><li>• Record for portfolio.</li>";
             } else if (efficiency < 98) {
-                diag.innerHTML = "<span class='text-amber-500 font-bold'>DAMPED.</span> Mass is too high for the stiffness provided.";
-                actions.innerHTML = "<li>• Reduce thickness in low-stress regions (upper/lower bouts).</li><li>• Re-measure after 2g removal.</li>";
+                diag.innerHTML = "<span class='text-amber-500 uppercase font-black'>Damping Warning.</span> The plate is carrying dead mass.";
+                actions.innerHTML = "<li>• Reduce thickness in perimeter/lungs.</li><li>• Remove 2g and re-test.</li>";
             } else {
-                diag.innerHTML = "<span class='text-blue-400 font-bold'>OVER-STIFF.</span> Tension is too high for the fundamental resonance.";
-                actions.innerHTML = "<li>• Thin the center spine or reduce arching/bracing height.</li>";
+                diag.innerHTML = "<span class='text-blue-400 uppercase font-black'>Stiffness Alert.</span> Over-stiff system. May sound glassy.";
+                actions.innerHTML = "<li>• Thin the central spine.</li><li>• Scallop braces further (Guitars).</li>";
             }
+
+            // Add to History
+            const inst = document.getElementById('instrument').value;
+            const log = {
+                comp: `${inst} ${currentPlate}`,
+                dens: document.getElementById('density').value,
+                mass: cM,
+                freq: cF,
+                eff: efficiency
+            };
+            history.unshift(log);
+            if(history.length > 5) history.pop();
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const body = document.getElementById('historyBody');
+            body.innerHTML = history.map(h => `
+                <tr class="history-row border-b border-stone-100 hover:bg-stone-50">
+                    <td class="py-2 font-bold uppercase">${h.comp}</td>
+                    <td>${h.dens}</td>
+                    <td>${h.mass}g</td>
+                    <td>${h.freq}Hz</td>
+                    <td class="font-black ${h.eff >= 98 && h.eff <= 102 ? 'text-green-600' : 'text-stone-800'}">${h.eff}%</td>
+                </tr>
+            `).join('');
         }
 
         function exportData() {
-            const inst = document.getElementById('instrument').value;
-            const plate = currentPlate;
-            const d = document.getElementById('density').value;
-            const mass = document.getElementById('currMass').value;
-            const freq = document.getElementById('currFreq').value;
-            const eff = document.getElementById('efficiencyTag').innerText;
-
-            const text = `RATIONAL LUTHIER REPORT\n--------------------\nInstrument: ${inst}\nPlate: ${plate}\nDensity: ${d} g/cm3\nMass: ${mass}g\nFrequency: ${freq}Hz\nEfficiency: ${eff}\n--------------------\nNotes: Generated for Apprenticeship Portfolio`;
+            if(history.length === 0) return alert("Log at least one measurement first.");
+            const text = history.map(h => 
+                `LOG: ${h.comp} | Density: ${h.dens} | Mass: ${h.mass}g | Freq: ${h.freq}Hz | Efficiency: ${h.eff}%`
+            ).join('\n');
             const blob = new Blob([text], {type: 'text/plain'});
             const anchor = document.createElement('a');
-            anchor.download = `Rational_Report_${inst}.txt`;
+            anchor.download = `Workshop_Log_${new Date().toLocaleDateString()}.txt`;
             anchor.href = window.URL.createObjectURL(blob);
             anchor.click();
         }
+
+        // Init
+        updateTargets();
     </script>
 </body>
 </html>
