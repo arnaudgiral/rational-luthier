@@ -3,17 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rational Luthier v3.8</title>
+    <title>Rational Luthier v3.9</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Lato:wght@300;400;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #1c1917; /* Stone 900 */
             --accent: #d97706; /* Amber 600 */
             --bg: #fafaf9; /* Stone 50 */
         }
-        body { font-family: 'Lato', sans-serif; background-color: var(--bg); color: var(--primary); }
-        h1, h2, h3, h4, .serif { font-family: 'Lato' }
+        /* PURE SANS-SERIF TYPOGRAPHY */
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--primary); }
+        h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.02em; }
         .mono { font-family: 'JetBrains Mono', monospace; }
         
         /* Form Styling */
@@ -54,8 +55,8 @@
 
     <aside class="lg:w-80 bg-white p-10 sidebar-border flex flex-col h-screen sticky top-0 overflow-y-auto">
         <header class="mb-10">
-            <h1 class="text-2xl font-bold tracking-wider text-stone-900">RATIONAL <span class="text-amber-600">LUTHIER</span></h1>
-            <p class="text-[10px] font-bold text-stone-400 uppercase tracking-[0.2em] mt-2">Atelier Suite v3.8</p>
+            <h1 class="text-2xl text-stone-900 uppercase">Rational <span class="text-amber-600">Luthier</span></h1>
+            <p class="text-[10px] font-bold text-stone-400 uppercase tracking-[0.2em] mt-2">Studio Suite v3.9</p>
         </header>
 
         <div class="space-y-8 flex-1">
@@ -75,6 +76,7 @@
                     <optgroup label="Guitars">
                         <option value="classical_hauser">Classical (Hauser)</option>
                         <option value="steel_string_om">Steel String (OM)</option>
+                        <option value="steel_string_parlour">Parlour (Martin 1-18)</option>
                     </optgroup>
                 </select>
             </div>
@@ -120,21 +122,21 @@
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
             <div class="stat-card">
-                <h3 class="serif text-xs font-bold text-stone-400 uppercase tracking-widest mb-4">Target Mass</h3>
+                <h3 class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-4">Target Mass</h3>
                 <div class="flex items-baseline">
                     <span id="targetMass" class="text-4xl font-light text-stone-900 mono">--</span>
                     <span class="ml-2 text-xs font-bold text-stone-400">g</span>
                 </div>
             </div>
             <div class="stat-card">
-                <h3 id="targetModeLabel" class="serif text-xs font-bold text-stone-400 uppercase tracking-widest mb-4">Target Freq</h3>
+                <h3 id="targetModeLabel" class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-4">Target Freq</h3>
                 <div class="flex items-baseline">
                     <span id="targetFreq" class="text-4xl font-light text-stone-900 mono">--</span>
                     <span class="ml-2 text-xs font-bold text-stone-400">Hz</span>
                 </div>
             </div>
             <div class="stat-card border-amber-200 bg-amber-50/30">
-                <h3 class="serif text-xs font-bold text-amber-600 uppercase tracking-widest mb-4">Est. Thickness</h3>
+                <h3 class="text-xs font-bold text-amber-600 uppercase tracking-widest mb-4">Est. Thickness</h3>
                 <div class="flex items-baseline">
                     <span id="predictedThickness" class="text-4xl font-light text-amber-700 mono">--</span>
                     <span class="ml-2 text-xs font-bold text-amber-600">mm</span>
@@ -145,7 +147,7 @@
         <section class="doctor-panel rounded-sm shadow-2xl p-10 lg:p-12 mb-12">
             <div class="flex justify-between items-start border-b border-stone-800 pb-8 mb-8">
                 <div>
-                    <h2 class="text-2xl font-light tracking-wide text-white serif">Diagnosis Engine</h2>
+                    <h2 class="text-2xl font-light tracking-wide text-white uppercase">Diagnosis Engine</h2>
                     <p class="text-xs text-stone-500 mt-2 uppercase tracking-widest">Real-time Acoustic Analysis</p>
                 </div>
                 <div id="efficiencyTag" class="text-5xl font-light mono text-amber-500">--%</div>
@@ -183,7 +185,7 @@
 
         <div class="space-y-6">
             <div class="flex justify-between items-end border-b border-stone-200 pb-4">
-                <h3 class="serif text-lg font-bold text-stone-900">Workbench Log</h3>
+                <h3 class="text-lg font-bold text-stone-900 uppercase">Workbench Log</h3>
                 <button onclick="exportHistory()" class="text-[10px] font-bold text-stone-400 hover:text-stone-900 uppercase tracking-widest transition cursor-pointer">
                     ↓ Download CSV
                 </button>
@@ -209,14 +211,14 @@
         let currentPlate = 'front';
         let history = [];
 
-        // LIBRARY UPDATED: c values restored | Colichon thickness updated to 3.0mm
+        // LIBRARY UPDATED: Added Martin 1-18 Parlour
         const library = {
             violin: { 
-                c: 5200, // Speed of sound ref
+                c: 5200, 
                 f_raw: {m:62, f:305, d:0.37, t:2.8, mode:'M5'}, 
                 f_holes: {m:60, f:288, d:0.37, t:2.8, mode:'M5'}, 
                 f_barred: {m:65, f:340, d:0.37, t:2.8, mode:'M5'}, 
-                back: {m:105, f:360, d:0.59, c:4200, t:4.2, mode:'M5'} // Backs have lower c (Maple)
+                back: {m:105, f:360, d:0.59, c:4200, t:4.2, mode:'M5'} 
             },
             viola: { 
                 c: 5200,
@@ -250,7 +252,7 @@
             },
             viol_colichon: { 
                 c: 5300,
-                f_raw: {m:205, f:85, d:0.36, t:3.0, mode:'M5'}, // UPDATED to 3.0mm
+                f_raw: {m:205, f:85, d:0.36, t:3.0, mode:'M5'}, 
                 f_holes: {m:200, f:78, d:0.36, t:3.0, mode:'M5'}, 
                 f_barred: {m:225, f:105, d:0.36, t:3.0, mode:'M5'}, 
                 back: {m:320, f:98, d:0.62, c:4200, t:3.5, mode:'M5'} 
@@ -270,6 +272,15 @@
                 f_holes: {m:141, f:96, d:0.43, t:2.6, mode:'M2'}, 
                 f_braced: {m:210, f:205, d:0.43, t:2.6, mode:'M4'}, 
                 back: {m:240, f:240, d:0.85, c:4400, t:2.3, mode:'M5'} 
+            },
+            steel_string_parlour: { 
+                c: 5500,
+                // Parlour 1-18: Smaller body than OM, requiring lighter graduation.
+                f_raw: {m:118, f:110, d:0.40, t:2.4, mode:'M2'}, 
+                f_holes: {m:114, f:104, d:0.40, t:2.4, mode:'M2'}, 
+                f_braced: {m:160, f:215, d:0.40, t:2.4, mode:'M4'}, 
+                // Style 18 Mahogany back is lighter/less dense than Rosewood OM
+                back: {m:175, f:260, d:0.60, c:4200, t:2.4, mode:'M5'} 
             }
         };
 
@@ -284,7 +295,7 @@
 
             // Milestone Steps
             if (currentPlate === 'front') {
-                if (inst.includes('hauser') || inst.includes('om')) {
+                if (inst.includes('hauser') || inst.includes('om') || inst.includes('parlour')) {
                     stepSel.innerHTML = `<option value="f_raw">Raw Graduation</option><option value="f_holes">Soundhole Cut</option><option value="f_braced">Bracing Phase</option>`;
                 } else {
                     stepSel.innerHTML = `<option value="f_raw">Plate Graduation</option><option value="f_holes">F-Holes / C-Holes Cut</option><option value="f_barred">Bass Bar Phase</option>`;
@@ -319,14 +330,13 @@
             
             // Ref Logic
             const ref = library[inst][step] || library[inst].back;
-            const refC = library[inst].c || 5000; // Fallback c
+            const refC = library[inst].c || 5000;
 
             let tM = ref.m * (dens / ref.d);
             let tF = ref.f * Math.sqrt(ref.d / dens);
             
-            // Speed of Sound Correction (New)
+            // Speed of Sound Correction
             if (speedInput > 0) {
-                // If actual speed is higher than ref speed, wood is stiffer -> frequency goes UP
                 tF = tF * (speedInput / refC);
             }
 
