@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rational Luthier</title>
+    <title>Rational Luthier v3.6 Refined</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
     <style>
@@ -23,18 +23,20 @@
         <aside class="lg:w-80 bg-white p-8 sidebar space-y-8">
             <header>
                 <h1 class="text-2xl font-black tracking-tighter italic uppercase">Rational <span class="text-amber-600">Luthier</span></h1>
-                <p class="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">Precision Workshop Suite </p>
+                <p class="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">Precision Studio v3.6 Refined</p>
             </header>
 
             <div class="space-y-6">
                 <section>
                     <label class="text-[10px] font-black uppercase text-zinc-400 mb-2 block">Instrument Architecture</label>
                     <select id="instrument" class="w-full bg-stone-50 p-3 font-bold text-sm border-none rounded" onchange="initProjectUI()">
-                        <optgroup label="Bowed Strings">
+                        <optgroup label="Bowed Strings (Violin Family)">
                             <option value="violin">Violin (35.5cm)</option>
                             <option value="viola">Viola (41cm)</option>
                             <option value="cello">Cello (75.5cm)</option>
                             <option value="bass_violin">Bass Violin (80cm)</option>
+                        </optgroup>
+                        <optgroup label="The Viol Family">
                             <option value="viol_jaye">Bass Viol (Jaye - 62cm)</option>
                             <option value="viol_colichon">Bass Viol (Colichon - 70cm)</option>
                         </optgroup>
@@ -71,24 +73,19 @@
                             <span class="text-[10px] font-bold text-zinc-400 uppercase italic">Density (ρ)</span>
                             <input type="number" id="density" value="0.37" step="0.01" class="w-full py-1 bg-transparent border-b border-stone-200 mono text-lg font-bold input-focus" oninput="calculate()">
                         </div>
-                        <div>
-                            <span class="text-[10px] font-bold text-zinc-400 uppercase italic">Sound Speed (m/s)</span>
-                            <input type="number" id="speed" placeholder="Optional" class="w-full py-1 bg-transparent border-b border-stone-200 mono text-lg font-bold input-focus" oninput="calculate()">
-                        </div>
                     </div>
                 </section>
             </div>
         </aside>
 
         <main class="flex-1 p-6 lg:p-12 space-y-8">
-            
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="glass-card p-6 border-t-2 border-zinc-100">
                     <span class="text-[10px] font-black uppercase text-zinc-400 tracking-widest">Target Mass</span>
                     <div id="targetMass" class="text-4xl font-black italic mono mt-1 text-zinc-800">--</div>
                 </div>
                 <div class="glass-card p-6 border-t-2 border-zinc-100">
-                    <span id="targetModeLabel" class="text-[10px] font-black uppercase text-zinc-400 tracking-widest text-ellipsis">Target Frequency</span>
+                    <span id="targetModeLabel" class="text-[10px] font-black uppercase text-zinc-400 tracking-widest">Target Frequency</span>
                     <div id="targetFreq" class="text-4xl font-black italic mono mt-1 text-zinc-800">--</div>
                 </div>
                 <div class="glass-card p-6 border-t-2 border-zinc-100">
@@ -118,7 +115,7 @@
                                 </div>
                             </div>
                         </div>
-                        <button onclick="saveToLog()" class="w-full py-4 bg-amber-600 text-white font-black text-xs uppercase tracking-widest hover:bg-amber-500 transition rounded-lg">Record Log Entry</button>
+                        <button onclick="saveToLog()" class="w-full py-4 bg-amber-600 text-white font-black text-xs uppercase tracking-widest hover:bg-amber-500 transition rounded-lg shadow-lg">Record Log Entry</button>
                     </div>
 
                     <div class="space-y-8">
@@ -142,7 +139,7 @@
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm">
                     <thead class="text-[10px] uppercase font-black text-zinc-400 border-b border-stone-200">
-                        <tr><th class="pb-4 px-2">Build Step</th><th class="pb-4">Mass</th><th class="pb-4">Frequency</th><th class="pb-4">Efficiency</th></tr>
+                        <tr><th class="pb-4 px-2">Build Step</th><th class="pb-4">Mass</th><th class="pb-4">Freq</th><th class="pb-4">Efficiency</th></tr>
                     </thead>
                     <tbody id="historyBody" class="divide-y divide-stone-100 mono text-xs"></tbody>
                 </table>
@@ -154,28 +151,49 @@
         let currentPlate = 'front';
         let history = [];
 
+        // REFINED LIBRARY: Viols now include full milestone paths (f_raw -> f_holes -> f_barred)
         const library = {
-            violin: { f_raw: {m:62, f:305, d:0.37, c:5200, t:2.8, mode:'M5'}, f_holes: {m:60, f:288, d:0.37, c:5200, t:2.8, mode:'M5'}, f_barred: {m:65, f:340, d:0.37, c:5200, t:2.8, mode:'M5'}, back: {m:105, f:360, d:0.59, c:4100, t:4.2, mode:'M5'} },
-            viola: { f_raw: {m:95, f:265, d:0.38, c:5200, t:3.1, mode:'M5'}, f_holes: {m:92, f:250, d:0.38, c:5200, t:3.1, mode:'M5'}, f_barred: {m:102, f:305, d:0.38, c:5200, t:3.1, mode:'M5'}, back: {m:160, f:325, d:0.59, c:4100, t:4.8, mode:'M5'} },
-            cello: { f_raw: {m:370, f:142, d:0.36, c:5100, t:5.2, mode:'M5'}, f_holes: {m:362, f:135, d:0.36, c:5100, t:5.2, mode:'M5'}, f_barred: {m:410, f:168, d:0.36, c:5100, t:5.2, mode:'M5'}, back: {m:650, f:185, d:0.61, c:4000, t:8.0, mode:'M5'} },
-            bass_violin: { f_raw: {m:430, f:125, d:0.35, c:5000, t:6.5, mode:'M5'}, f_holes: {m:420, f:116, d:0.35, c:5000, t:6.5, mode:'M5'}, f_barred: {m:465, f:155, d:0.35, c:5000, t:6.5, mode:'M5'}, back: {m:860, f:180, d:0.61, c:4100, t:9.5, mode:'M5'} },
-            viol_jaye: { f_raw: {m:142, f:112, d:0.36, c:5300, t:2.3, mode:'M5'}, back: {m:220, f:124, d:0.62, c:4200, t:3.0, mode:'M5'} },
-            viol_colichon: { f_raw: {m:205, f:85, d:0.36, c:5300, t:2.6, mode:'M5'}, back: {m:320, f:98, d:0.62, c:4200, t:3.5, mode:'M5'} },
-            classical_hauser: { f_raw: {m:130, f:95, d:0.40, c:5500, t:2.4, mode:'M2'}, f_holes: {m:126, f:90, d:0.40, c:5500, t:2.4, mode:'M2'}, f_braced: {m:175, f:185, d:0.40, c:5500, t:2.4, mode:'M4'}, back: {m:210, f:220, d:0.82, c:4400, t:2.1, mode:'M5'} },
-            steel_string_om: { f_raw: {m:145, f:102, d:0.43, c:5500, t:2.6, mode:'M2'}, f_holes: {m:141, f:96, d:0.43, c:5500, t:2.6, mode:'M2'}, f_braced: {m:210, f:205, d:0.43, c:5500, t:2.6, mode:'M4'}, back: {m:240, f:240, d:0.85, c:4400, t:2.3, mode:'M5'} }
+            violin: { f_raw: {m:62, f:305, d:0.37, t:2.8, mode:'M5'}, f_holes: {m:60, f:288, d:0.37, t:2.8, mode:'M5'}, f_barred: {m:65, f:340, d:0.37, t:2.8, mode:'M5'}, back: {m:105, f:360, d:0.59, t:4.2, mode:'M5'} },
+            viola: { f_raw: {m:95, f:265, d:0.38, t:3.1, mode:'M5'}, f_holes: {m:92, f:250, d:0.38, t:3.1, mode:'M5'}, f_barred: {m:102, f:305, d:0.38, t:3.1, mode:'M5'}, back: {m:160, f:325, d:0.59, t:4.8, mode:'M5'} },
+            cello: { f_raw: {m:370, f:142, d:0.36, t:5.2, mode:'M5'}, f_holes: {m:362, f:135, d:0.36, t:5.2, mode:'M5'}, f_barred: {m:410, f:168, d:0.36, t:5.2, mode:'M5'}, back: {m:650, f:185, d:0.61, t:8.0, mode:'M5'} },
+            bass_violin: { f_raw: {m:430, f:125, d:0.35, t:6.5, mode:'M5'}, f_holes: {m:420, f:116, d:0.35, t:6.5, mode:'M5'}, f_barred: {m:465, f:155, d:0.35, t:6.5, mode:'M5'}, back: {m:860, f:180, d:0.61, t:9.5, mode:'M5'} },
+            
+            // VIOL UPDATES: Calibrated based on search data (Colichon 1683 / Jaye 1629)
+            // Note: Viols lose more stiffness relative to mass when holes are cut due to the thinner plate.
+            viol_jaye: { 
+                f_raw: {m:142, f:112, d:0.36, t:2.3, mode:'M5'}, 
+                f_holes: {m:139, f:104, d:0.36, t:2.3, mode:'M5'}, 
+                f_barred: {m:155, f:130, d:0.36, t:2.3, mode:'M5'}, 
+                back: {m:220, f:124, d:0.62, t:3.0, mode:'M5'} 
+            },
+            viol_colichon: { 
+                f_raw: {m:205, f:85, d:0.36, t:2.6, mode:'M5'}, 
+                f_holes: {m:200, f:78, d:0.36, t:2.6, mode:'M5'}, 
+                f_barred: {m:225, f:105, d:0.36, t:2.6, mode:'M5'}, 
+                back: {m:320, f:98, d:0.62, t:3.5, mode:'M5'} 
+            },
+            
+            classical_hauser: { f_raw: {m:130, f:95, d:0.40, t:2.4, mode:'M2'}, f_holes: {m:126, f:90, d:0.40, t:2.4, mode:'M2'}, f_braced: {m:175, f:185, d:0.40, t:2.4, mode:'M4'}, back: {m:210, f:220, d:0.82, t:2.1, mode:'M5'} },
+            steel_string_om: { f_raw: {m:145, f:102, d:0.43, t:2.6, mode:'M2'}, f_holes: {m:141, f:96, d:0.43, t:2.6, mode:'M2'}, f_braced: {m:210, f:205, d:0.43, t:2.6, mode:'M4'}, back: {m:240, f:240, d:0.85, t:2.3, mode:'M5'} }
         };
 
         function initProjectUI() {
             const inst = document.getElementById('instrument').value;
             const stepSel = document.getElementById('step');
             const archCont = document.getElementById('archingContainer');
-            archCont.style.display = (inst.includes('hauser') || inst.includes('om')) ? 'none' : 'block';
 
+            // 1. Arching Profile Visibility Logic
+            const isViolinFamily = ['violin', 'viola', 'cello', 'bass_violin'].includes(inst);
+            archCont.style.display = isViolinFamily ? 'block' : 'none';
+
+            // 2. Build Milestone Logic
             if (currentPlate === 'front') {
-                stepSel.innerHTML = (inst.includes('hauser') || inst.includes('om')) ? 
-                    `<option value="f_raw">Raw Graduation</option><option value="f_holes">Soundhole Cut</option><option value="f_braced">Bracing Phase</option>` :
-                    (inst.includes('viol_')) ? `<option value="f_raw">Plate Graduation</option>` :
-                    `<option value="f_raw">Plate Graduation</option><option value="f_holes">F-Holes Cut</option><option value="f_barred">Bass Bar Phase</option>`;
+                if (inst.includes('hauser') || inst.includes('om')) {
+                    stepSel.innerHTML = `<option value="f_raw">Raw Graduation</option><option value="f_holes">Soundhole Cut</option><option value="f_braced">Bracing Phase</option>`;
+                } else {
+                    // Unified sequence for both Violins and Viols
+                    stepSel.innerHTML = `<option value="f_raw">Plate Graduation</option><option value="f_holes">F-Holes / C-Holes Cut</option><option value="f_barred">Bass Bar Phase</option>`;
+                }
             } else {
                 stepSel.innerHTML = `<option value="back">Final Back Graduation</option>`;
             }
@@ -194,13 +212,17 @@
             const step = document.getElementById('step').value;
             const arch = document.getElementById('arching').value;
             const dens = parseFloat(document.getElementById('density').value) || 0.37;
-            const speed = parseFloat(document.getElementById('speed').value);
             const ref = library[inst][step] || library[inst].back;
             
             let tM = ref.m * (dens / ref.d);
             let tF = ref.f * Math.sqrt(ref.d / dens);
-            if (speed > 0) tF *= (speed / ref.c);
-            if (!(inst.includes('hauser') || inst.includes('om')) && arch === 'high') { tM *= 0.94; tF *= 1.02; }
+            
+            // Arching correction only applies if the dropdown is visible
+            const isViolinFamily = ['violin', 'viola', 'cello', 'bass_violin'].includes(inst);
+            if (isViolinFamily && arch === 'high') { 
+                tM *= 0.94; // High arch allows less mass for same strength
+                tF *= 1.02; // High arch is inherently stiffer
+            }
             
             document.getElementById('targetMass').innerText = Math.round(tM) + 'g';
             document.getElementById('targetFreq').innerText = Math.round(tF) + 'Hz';
@@ -213,24 +235,35 @@
         function getDoctorAdvice(eff, inst, step) {
             let advice = {diag: "", comp: ""};
             
-            if (eff >= 98 && eff <= 102) {
-                advice.diag = "SYSTEM RATIONALIZED. The relationship between mass and stiffness is at its peak. Proceed to final surface prep.";
-                advice.comp = "Material removal should stop immediately. Minor cleaning with a scraper is acceptable, but do not scrape aggressively.";
-            } else if (eff < 98) {
-                advice.diag = "SYSTEM DAMPED. The plate is carrying non-contributing mass. High weight is choking the resonance.";
-                advice.comp = "Focus on the Bout Perimeters (The Lungs). Thin the region where the arching meets the recurve to shed mass without losing spine stiffness.";
+            // 3. Deep Conditional Logic for Advice
+            if (eff >= 97 && eff <= 103) {
+                advice.diag = "SYSTEM RATIONALIZED. The plate is exhibiting ideal stiffness-to-mass ratio.";
+                advice.comp = "Stop removing material. If the tap tone is clear and sustains well, you have reached the 'sweet spot'. Further thinning will risk a 'tubby' or 'hollow' tone.";
+            } else if (eff < 97) {
+                // Low Efficiency (Too heavy for its stiffness)
+                advice.diag = "SYSTEM DAMPED (Inefficient). The plate is carrying non-structural mass.";
+                if (inst.includes('viol_')) {
+                    advice.comp = "<b>Viol Specific:</b> Viols require active vibration across the entire surface. Thin the 'wings' (outer upper/lower bouts) aggressively. Unlike a violin, the viol perimeter should not be rigid.";
+                } else {
+                    advice.comp = "Focus on the 'Lungs' (the area between the C-bouts and the upper/lower blocks). Thinning the recurve here will drop mass significantly while preserving longitudinal spine stiffness.";
+                }
             } else {
-                advice.diag = "SYSTEM OVER-STIFF. The plate is too rigid for its mass. Tone will likely be brittle and unresponsive.";
-                advice.comp = "Reduce the thickness of the center spine. If the bass bar or bracing is glued, check for excessive height at the bridge line.";
+                // High Efficiency (Too stiff for its mass)
+                advice.diag = "SYSTEM OVER-STIFF (Brittle). The plate is too rigid to pump air effectively.";
+                advice.comp = "The plate is effectively too thick for this specific piece of wood. Reduce the central spine thickness carefully. A plate this stiff will lack bass response and warmth.";
             }
 
-            if (step === 'f_barred') {
-                const barH = (inst === 'violin') ? '11mm' : (inst === 'cello') ? '25mm' : (inst === 'bass_violin') ? '28mm' : '10mm';
-                advice.comp += `<br><br><b>Bass Bar Focus:</b> Ensure a maximum height of ${barH} at the bridge line. Taper the ends to 1.5mm to allow the plate to breathe.`;
-            } else if (inst.includes('viol_jaye')) {
-                advice.comp += "<br><br><b>Jaye Model Calibration:</b> With a 62cm body and 120mm ribs, this air box is compact. Aim for high response speed. The plate should feel extremely flexible in the hands.";
-            } else if (inst.includes('viol_colichon')) {
-                advice.comp += "<br><br><b>Colichon Model Focus:</b> 70cm bodies require ethereal lightness. Prioritize a clean, flute-like tap tone over structural bulk.";
+            // Context-Specific Step Advice
+            if (step === 'f_holes') {
+                advice.comp += "<br><br><b>Warning:</b> Cutting the holes breaks the longitudinal arch. You will see a frequency drop (approx -10% on Viols). Do not panic and remove more wood; this drop is structural and expected.";
+            } 
+            else if (step === 'f_barred') {
+                advice.comp += "<br><br><b>Bass Bar Tuning:</b> The goal is to restore the frequency lost when cutting the holes. Trim the bar height, not the plate. Tune the bar until you regain the pre-cut frequency.";
+            }
+
+            // Instrument Family nuance
+            if (inst.includes('jaye')) {
+                advice.comp += "<br><br><b>Jaye Note:</b> With 120mm deep ribs, the air resonance (A0) will be deep. The plate must be light (flexible) to couple with this large air volume. Err on the side of flexibility.";
             }
 
             return advice;
