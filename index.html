@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rational Luthier v4.0</title>
+    <title>Rational Luthier v4.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
@@ -15,21 +15,65 @@
         body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--primary); }
         h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.02em; }
         .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        /* Form Styling */
         select, input { transition: all 0.2s; border: 1px solid #e7e5e4; }
         select:focus, input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+        
+        /* Layout Utilities */
         .sidebar-border { border-right: 1px solid #e7e5e4; }
         .stat-card { background: white; border: 1px solid #e7e5e4; padding: 2rem; transition: transform 0.2s; }
         .stat-card:hover { transform: translateY(-2px); border-color: #d6d3d1; }
         .doctor-panel { background-color: #1c1917; color: #fafaf9; }
         .doctor-accent { border-left: 2px solid var(--accent); padding-left: 1.5rem; }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed; 
+            z-index: 50; 
+            left: 0; top: 0; width: 100%; height: 100%; 
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+        }
+        .modal-content {
+            background-color: #fff;
+            margin: 10% auto;
+            padding: 40px;
+            border: 1px solid #888;
+            width: 90%; max-width: 500px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col lg:flex-row antialiased">
 
+    <div id="patternModal" class="modal">
+        <div class="modal-content relative">
+            <span class="absolute top-4 right-6 text-2xl font-bold cursor-pointer hover:text-amber-600" onclick="closeModal()">&times;</span>
+            <h3 class="text-xl font-bold uppercase tracking-wide mb-2">Mode Visualization</h3>
+            <p id="modalModeName" class="text-xs font-bold text-amber-600 uppercase tracking-widest mb-6">M5 - The Ring Mode</p>
+            
+            <div id="modalSvg" class="w-full h-64 bg-stone-50 border border-stone-200 flex items-center justify-center mb-6">
+                </div>
+
+            <div class="space-y-4 text-sm text-stone-600">
+                <div class="flex items-start">
+                    <span class="font-bold w-16 uppercase text-xs mt-1 text-stone-400">Hold</span>
+                    <p id="modalHoldText">Hold the plate firmly at the nodal line (blue dot).</p>
+                </div>
+                <div class="flex items-start">
+                    <span class="font-bold w-16 uppercase text-xs mt-1 text-stone-400">Tap</span>
+                    <p id="modalTapText">Tap quickly at the antinode (red target) to excite the mode.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <aside class="lg:w-80 bg-white p-10 sidebar-border flex flex-col h-screen sticky top-0 overflow-y-auto">
         <header class="mb-10">
             <h1 class="text-2xl text-stone-900 uppercase">Rational <span class="text-amber-600">Luthier</span></h1>
-            <p class="text-[10px] font-bold text-stone-400 uppercase tracking-[0.2em] mt-2">Physics Suite v4.0</p>
+            <p class="text-[10px] font-bold text-stone-400 uppercase tracking-[0.2em] mt-2">Master Class v4.1</p>
         </header>
 
         <div class="space-y-8 flex-1">
@@ -61,7 +105,7 @@
 
             <div class="space-y-2">
                 <label class="text-[10px] font-bold uppercase tracking-widest text-stone-400">Tonewood Species</label>
-                <select id="woodSpecies" class="w-full bg-stone-50 p-3 text-sm font-bold text-stone-700 rounded-none" onchange="calculate()">
+                <select id="woodSpecies" class="w-full bg-stone-50 p-3 text-sm font-bold text-stone-700 rounded-none" onchange="updateDensityRange(); calculate();">
                     </select>
             </div>
 
@@ -87,6 +131,7 @@
                     <div>
                         <span class="block text-[9px] font-bold text-stone-500 mb-1">DENSITY (ρ)</span>
                         <input type="number" id="density" value="0.37" step="0.01" class="w-full bg-transparent border-b border-stone-300 py-1 font-mono text-sm focus:border-amber-500" oninput="calculate()">
+                        <span id="densityRange" class="block text-[9px] text-amber-600 mt-1 font-mono">Range: 0.34 - 0.40</span>
                     </div>
                     <div>
                         <span class="block text-[9px] font-bold text-stone-500 mb-1">SPEED (m/s)</span>
@@ -107,13 +152,22 @@
                     <span class="ml-2 text-xs font-bold text-stone-400">g</span>
                 </div>
             </div>
-            <div class="stat-card">
-                <h3 id="targetModeLabel" class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-4">Target Freq</h3>
+            
+            <div class="stat-card relative">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 id="targetModeLabel" class="text-xs font-bold text-stone-400 uppercase tracking-widest">Target Freq</h3>
+                    <button onclick="openModal()" class="text-stone-400 hover:text-amber-600 transition" title="Show Chladni Pattern">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </button>
+                </div>
                 <div class="flex items-baseline">
                     <span id="targetFreq" class="text-4xl font-light text-stone-900 mono">--</span>
                     <span class="ml-2 text-xs font-bold text-stone-400">Hz</span>
                 </div>
             </div>
+
             <div class="stat-card border-amber-200 bg-amber-50/30">
                 <h3 class="text-xs font-bold text-amber-600 uppercase tracking-widest mb-4">Est. Thickness</h3>
                 <div class="flex items-baseline">
@@ -181,25 +235,25 @@
 
     <script>
         let currentPlate = 'front';
+        let currentRefMode = 'M5'; // Used for modal
         let history = [];
 
-        // --- TONEWOOD DATABASE ---
-        // 'mod' is the stiffness modifier (Young's Modulus factor). 
-        // 1.0 = Standard ref (Euro Spruce / Maple). <1.0 = Softer. >1.0 = Stiffer.
+        // --- TONEWOOD DATABASE (UPDATED) ---
+        // Range format: [min, max] for UI display
         const woods = {
             front: [
-                {name: "European Spruce", mod: 1.0},
-                {name: "Sitka Spruce", mod: 1.08}, // Stiffer, allows slightly thinner
-                {name: "Cedrela (Spanish Cedar)", mod: 0.85} // Softer, requires thicker graduation
+                {name: "European Spruce", mod: 1.0, range: "0.36 - 0.44"},
+                {name: "Sitka Spruce", mod: 1.08, range: "0.39 - 0.48"},
+                {name: "Cedrela (Spanish Cedar)", mod: 0.85, range: "0.33 - 0.39"}
             ],
             back: [
-                {name: "European Maple", mod: 1.0},
-                {name: "Black Walnut", mod: 0.95},
-                {name: "Pearwood", mod: 0.92},
-                {name: "Cherry", mod: 0.94},
-                {name: "London Plane", mod: 0.90},
-                {name: "Honduran Mahogany", mod: 0.88},
-                {name: "Indian Rosewood", mod: 1.15} // Very stiff, allows thinner
+                {name: "European Maple", mod: 1.0, range: "0.58 - 0.66"},
+                {name: "Walnut", mod: 0.95, range: "0.55 - 0.65"}, // Juglans Regia
+                {name: "Pearwood", mod: 0.92, range: "0.68 - 0.74"},
+                {name: "Cherry", mod: 0.94, range: "0.55 - 0.62"},
+                {name: "London Plane", mod: 0.90, range: "0.58 - 0.64"},
+                {name: "Mahogany", mod: 0.88, range: "0.48 - 0.58"}, // Honduran
+                {name: "Indian Rosewood", mod: 1.15, range: "0.75 - 0.85"}
             ]
         };
 
@@ -234,33 +288,30 @@
                 back: {m:860, f:180, d:0.61, c:4100, t:9.5, mode:'M5'} 
             },
             
-            // VIOLS (Added Back Phases)
+            // VIOLS
             viol_jaye: { 
                 c: 5300,
                 f_raw: {m:142, f:112, d:0.36, t:2.3, mode:'M5'}, 
                 f_holes: {m:139, f:104, d:0.36, t:2.3, mode:'M5'}, 
                 f_barred: {m:155, f:130, d:0.36, t:2.3, mode:'M5'}, 
-                // Back Phases
                 b_raw: {m:220, f:124, d:0.62, c:4200, t:3.0, mode:'M5'},
-                b_soundpost: {m:235, f:140, d:0.62, c:4200, t:3.0, mode:'M5'} // Plate adds mass & stiffness
+                b_soundpost: {m:235, f:140, d:0.62, c:4200, t:3.0, mode:'M5'}
             },
             viol_colichon: { 
                 c: 5300,
                 f_raw: {m:205, f:85, d:0.36, t:3.0, mode:'M5'}, 
                 f_holes: {m:200, f:78, d:0.36, t:3.0, mode:'M5'}, 
                 f_barred: {m:225, f:105, d:0.36, t:3.0, mode:'M5'}, 
-                // Back Phases
                 b_raw: {m:320, f:98, d:0.62, c:4200, t:3.5, mode:'M5'},
                 b_soundpost: {m:335, f:115, d:0.62, c:4200, t:3.5, mode:'M5'}
             },
             
-            // GUITARS (Added Back Phases)
+            // GUITARS
             classical_hauser: { 
                 c: 5500,
                 f_raw: {m:130, f:95, d:0.40, t:2.4, mode:'M2'}, 
                 f_holes: {m:126, f:90, d:0.40, t:2.4, mode:'M2'}, 
                 f_braced: {m:175, f:185, d:0.40, t:2.4, mode:'M4'}, 
-                // Back Phases
                 b_raw: {m:210, f:120, d:0.82, c:4400, t:2.1, mode:'M2'},
                 b_braced: {m:245, f:220, d:0.82, c:4400, t:2.1, mode:'M5'} 
             },
@@ -269,7 +320,6 @@
                 f_raw: {m:145, f:102, d:0.43, t:2.6, mode:'M2'}, 
                 f_holes: {m:141, f:96, d:0.43, t:2.6, mode:'M2'}, 
                 f_braced: {m:210, f:205, d:0.43, t:2.6, mode:'M4'}, 
-                // Back Phases
                 b_raw: {m:240, f:125, d:0.85, c:4400, t:2.3, mode:'M2'},
                 b_braced: {m:285, f:240, d:0.85, c:4400, t:2.3, mode:'M5'} 
             },
@@ -278,7 +328,6 @@
                 f_raw: {m:118, f:110, d:0.40, t:2.4, mode:'M2'}, 
                 f_holes: {m:114, f:104, d:0.40, t:2.4, mode:'M2'}, 
                 f_braced: {m:160, f:215, d:0.40, t:2.4, mode:'M4'}, 
-                // Style 18 Mahogany back
                 b_raw: {m:175, f:130, d:0.60, c:4200, t:2.4, mode:'M2'},
                 b_braced: {m:205, f:260, d:0.60, c:4200, t:2.4, mode:'M5'} 
             }
@@ -293,11 +342,13 @@
             // 1. Wood Selector Logic
             woodSel.innerHTML = "";
             const woodList = currentPlate === 'front' ? woods.front : woods.back;
-            woodList.forEach(w => {
+            woodList.forEach((w, index) => {
                 const opt = document.createElement('option');
                 opt.value = w.mod;
                 opt.text = w.name;
+                opt.dataset.range = w.range; // Store range in data attribute
                 woodSel.add(opt);
+                if(index === 0) document.getElementById('densityRange').innerText = "Range: " + w.range;
             });
 
             // 2. Arching Visibility
@@ -305,7 +356,7 @@
             archCont.style.display = isViolinFamily ? 'block' : 'none';
 
             // 3. Milestone Logic
-            stepSel.innerHTML = ""; // Clear existing
+            stepSel.innerHTML = ""; 
             
             // GUITARS
             if (inst.includes('hauser') || inst.includes('om') || inst.includes('parlour')) {
@@ -334,6 +385,12 @@
             calculate();
         }
 
+        function updateDensityRange() {
+            const sel = document.getElementById('woodSpecies');
+            const range = sel.options[sel.selectedIndex].dataset.range;
+            document.getElementById('densityRange').innerText = "Range: " + range;
+        }
+
         function setPlate(type) {
             currentPlate = type;
             const btnF = document.getElementById('btnFront');
@@ -357,31 +414,26 @@
             const speedInput = parseFloat(document.getElementById('speed').value);
             const woodMod = parseFloat(document.getElementById('woodSpecies').value) || 1.0;
             
-            // Reference Retrieval
             let ref;
             if (library[inst][step]) {
                 ref = library[inst][step];
             } else if (currentPlate === 'back' && library[inst].back) {
-                ref = library[inst].back; // Fallback for simple violin backs
+                ref = library[inst].back;
             } else {
-                return; // Safety
+                return;
             }
             
+            currentRefMode = ref.mode; // Store for modal
             const refC = library[inst].c || 5000;
 
             let tM = ref.m * (dens / ref.d);
             let tF = ref.f * Math.sqrt(ref.d / dens);
             
-            // Physics Adjustments
             if (speedInput > 0) tF = tF * (speedInput / refC);
             if (['violin', 'viola', 'cello', 'bass_violin'].includes(inst) && arch === 'high') { 
                 tM *= 0.94; tF *= 1.02; 
             }
 
-            // Thickness Calculation with Wood Stiffness Modifier
-            // If woodMod < 1 (Softer), Thickness needs to be higher. T_new = T_old / sqrt(mod)? 
-            // Approx: Thickness scales inversely with stiffness to maintain freq. 
-            // We use a simplified scalar: 1/sqrt(mod).
             const tThick = (ref.t * (ref.d / dens)) * (1 / Math.sqrt(woodMod));
             
             document.getElementById('targetMass').innerText = Math.round(tM);
@@ -394,19 +446,14 @@
 
         function getDoctorAdvice(eff, inst, step) {
             let advice = {diag: "", comp: ""};
-            
-            // --- CONTEXT AWARE DIAGNOSIS ---
             const isGuitar = inst.includes('hauser') || inst.includes('om') || inst.includes('parlour');
             const isViol = inst.includes('viol_');
-            const isViolinFam = !isGuitar && !isViol;
 
-            // STATUS DIAGNOSIS
             if (eff >= 97 && eff <= 103) {
                 advice.diag = "SYSTEM RATIONALIZED.";
                 advice.comp = "Efficiency is optimal. The plate's stiffness matches its mass. Proceed to next phase.";
             } else if (eff < 97) {
                 advice.diag = "SYSTEM DAMPED (Inefficient).";
-                // Too Heavy / Not Stiff Enough
                 if (isGuitar) {
                     advice.comp = "The plate is too heavy for its stiffness. Reduce thickness at the **Lower Bout perimeter** (the 'active area'). Leave the center seam and bridge area structural.";
                 } else if (isViol) {
@@ -416,7 +463,6 @@
                 }
             } else {
                 advice.diag = "SYSTEM OVER-STIFF (Brittle).";
-                // Too Stiff / Too Light
                 if (isGuitar) {
                     advice.comp = "The plate is too stiff; it will sound tight and lack bass. Carefully reduce the **Center Seam** thickness or scallop the braces further (if braced).";
                 } else if (isViol) {
@@ -426,7 +472,6 @@
                 }
             }
 
-            // STEP SPECIFIC ADVICE
             if (step === 'b_soundpost' && isViol) {
                 const width = inst.includes('jaye') ? "9cm" : "7cm";
                 advice.comp += `<br><br><b>Soundpost Plate:</b> Glue a spruce veneer approx ${width} wide across the soundpost line. Thickness it until it matches the back plate's flexibility (approx equal thickness).`;
@@ -492,6 +537,55 @@
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
+        }
+
+        // --- MODAL LOGIC FOR CHLADNI PATTERNS ---
+        function openModal() {
+            const modal = document.getElementById('patternModal');
+            const modeName = document.getElementById('modalModeName');
+            const svgContainer = document.getElementById('modalSvg');
+            const holdText = document.getElementById('modalHoldText');
+            const tapText = document.getElementById('modalTapText');
+
+            modal.style.display = "block";
+            
+            // Generate SVG based on currentRefMode (M2, M5, M4)
+            let svgContent = '';
+            
+            if (currentRefMode === 'M2') {
+                
+                modeName.innerText = "M2 - The X-Mode (Longitudinal)";
+                holdText.innerText = "Hold the plate precisely in the CENTER (Node).";
+                tapText.innerText = "Tap the top corner or bottom center to excite the X shape.";
+                svgContent = `<svg viewBox="0 0 200 300" class="w-full h-full p-8"><path d="M50,20 C50,20 20,60 20,100 C20,180 10,200 10,250 C10,290 50,290 100,290 C150,290 190,290 190,250 C190,200 180,180 180,100 C180,60 150,20 150,20" fill="none" stroke="#e7e5e4" stroke-width="2"/><line x1="20" y1="20" x2="180" y2="280" stroke="#a8a29e" stroke-width="2" stroke-dasharray="5,5"/><line x1="180" y1="20" x2="20" y2="280" stroke="#a8a29e" stroke-width="2" stroke-dasharray="5,5"/><circle cx="100" cy="150" r="8" fill="#3b82f6" /><text x="115" y="155" font-size="12" fill="#3b82f6" font-family="sans-serif">HOLD</text><circle cx="100" cy="40" r="8" fill="#ef4444" /><text x="115" y="45" font-size="12" fill="#ef4444" font-family="sans-serif">TAP</text></svg>`;
+            } 
+            else if (currentRefMode === 'M5') {
+                
+                modeName.innerText = "M5 - The Ring Mode";
+                holdText.innerText = "Hold approx 20% down from top on the Node Line (Ring).";
+                tapText.innerText = "Tap dead center (The Bullseye).";
+                svgContent = `<svg viewBox="0 0 200 300" class="w-full h-full p-8"><path d="M50,20 C50,20 20,60 20,100 C20,180 10,200 10,250 C10,290 50,290 100,290 C150,290 190,290 190,250 C190,200 180,180 180,100 C180,60 150,20 150,20" fill="none" stroke="#e7e5e4" stroke-width="2"/><ellipse cx="100" cy="150" rx="60" ry="80" stroke="#a8a29e" stroke-width="2" stroke-dasharray="5,5" fill="none"/><circle cx="100" cy="70" r="8" fill="#3b82f6" /><text x="115" y="75" font-size="12" fill="#3b82f6" font-family="sans-serif">HOLD</text><circle cx="100" cy="150" r="8" fill="#ef4444" /><text x="115" y="155" font-size="12" fill="#ef4444" font-family="sans-serif">TAP</text></svg>`;
+            } 
+            else if (currentRefMode === 'M4') {
+                modeName.innerText = "M4 - The Cross Mode";
+                holdText.innerText = "Hold on the side edge (Node).";
+                tapText.innerText = "Tap near the bridge area but offset from center.";
+                svgContent = `<svg viewBox="0 0 200 300" class="w-full h-full p-8"><path d="M50,20 C50,20 20,60 20,100 C20,180 10,200 10,250 C10,290 50,290 100,290 C150,290 190,290 190,250 C190,200 180,180 180,100 C180,60 150,20 150,20" fill="none" stroke="#e7e5e4" stroke-width="2"/><path d="M20,150 Q100,150 180,150" stroke="#a8a29e" stroke-width="2" stroke-dasharray="5,5" fill="none"/><circle cx="20" cy="150" r="8" fill="#3b82f6" /><text x="35" y="155" font-size="12" fill="#3b82f6" font-family="sans-serif">HOLD</text><circle cx="100" cy="200" r="8" fill="#ef4444" /><text x="115" y="205" font-size="12" fill="#ef4444" font-family="sans-serif">TAP</text></svg>`;
+            }
+
+            svgContainer.innerHTML = svgContent;
+        }
+
+        function closeModal() {
+            document.getElementById('patternModal').style.display = "none";
+        }
+
+        // Close modal if clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('patternModal');
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
         }
 
         initProjectUI();
