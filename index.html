@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rational Luthier v3.9</title>
+    <title>Rational Luthier v4.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
@@ -12,43 +12,16 @@
             --accent: #d97706; /* Amber 600 */
             --bg: #fafaf9; /* Stone 50 */
         }
-        /* PURE SANS-SERIF TYPOGRAPHY */
         body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--primary); }
         h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.02em; }
         .mono { font-family: 'JetBrains Mono', monospace; }
-        
-        /* Form Styling */
-        select, input {
-            transition: all 0.2s;
-            border: 1px solid #e7e5e4;
-        }
-        select:focus, input:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 1px var(--accent);
-        }
-        
-        /* Layout Utilities */
+        select, input { transition: all 0.2s; border: 1px solid #e7e5e4; }
+        select:focus, input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
         .sidebar-border { border-right: 1px solid #e7e5e4; }
-        .stat-card {
-            background: white;
-            border: 1px solid #e7e5e4;
-            padding: 2rem;
-            transition: transform 0.2s;
-        }
+        .stat-card { background: white; border: 1px solid #e7e5e4; padding: 2rem; transition: transform 0.2s; }
         .stat-card:hover { transform: translateY(-2px); border-color: #d6d3d1; }
-        
-        /* The Doctor Section */
-        .doctor-panel {
-            background-color: #1c1917;
-            color: #fafaf9;
-            position: relative;
-            overflow: hidden;
-        }
-        .doctor-accent {
-            border-left: 2px solid var(--accent);
-            padding-left: 1.5rem;
-        }
+        .doctor-panel { background-color: #1c1917; color: #fafaf9; }
+        .doctor-accent { border-left: 2px solid var(--accent); padding-left: 1.5rem; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col lg:flex-row antialiased">
@@ -56,13 +29,13 @@
     <aside class="lg:w-80 bg-white p-10 sidebar-border flex flex-col h-screen sticky top-0 overflow-y-auto">
         <header class="mb-10">
             <h1 class="text-2xl text-stone-900 uppercase">Rational <span class="text-amber-600">Luthier</span></h1>
-            <p class="text-[10px] font-bold text-stone-400 uppercase tracking-[0.2em] mt-2">Studio Suite v3.9</p>
+            <p class="text-[10px] font-bold text-stone-400 uppercase tracking-[0.2em] mt-2">Physics Suite v4.0</p>
         </header>
 
         <div class="space-y-8 flex-1">
             <div class="space-y-2">
                 <label class="text-[10px] font-bold uppercase tracking-widest text-stone-400">Project Profile</label>
-                <select id="instrument" class="w-full bg-stone-50 p-3 text-sm font-bold text-stone-700 rounded-none focus:ring-0" onchange="initProjectUI()">
+                <select id="instrument" class="w-full bg-stone-50 p-3 text-sm font-bold text-stone-700 rounded-none" onchange="initProjectUI()">
                     <optgroup label="Violin Family">
                         <option value="violin">Violin (35.5cm)</option>
                         <option value="viola">Viola (41cm)</option>
@@ -82,8 +55,14 @@
             </div>
 
             <div class="grid grid-cols-2 gap-0 border border-stone-200">
-                <button id="btnFront" onclick="setPlate('front')" class="py-3 text-[10px] font-bold uppercase tracking-widest bg-stone-900 text-white hover:bg-stone-800 transition">Front</button>
+                <button id="btnFront" onclick="setPlate('front')" class="py-3 text-[10px] font-bold uppercase tracking-widest bg-stone-900 text-white transition">Front</button>
                 <button id="btnBack" onclick="setPlate('back')" class="py-3 text-[10px] font-bold uppercase tracking-widest bg-white text-stone-400 hover:text-stone-900 transition">Back</button>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-[10px] font-bold uppercase tracking-widest text-stone-400">Tonewood Species</label>
+                <select id="woodSpecies" class="w-full bg-stone-50 p-3 text-sm font-bold text-stone-700 rounded-none" onchange="calculate()">
+                    </select>
             </div>
 
             <div id="archingContainer" class="space-y-2">
@@ -148,7 +127,7 @@
             <div class="flex justify-between items-start border-b border-stone-800 pb-8 mb-8">
                 <div>
                     <h2 class="text-2xl font-light tracking-wide text-white uppercase">Diagnosis Engine</h2>
-                    <p class="text-xs text-stone-500 mt-2 uppercase tracking-widest">Real-time Acoustic Analysis</p>
+                    <p class="text-xs text-stone-500 mt-2 uppercase tracking-widest">Acoustic Analysis System</p>
                 </div>
                 <div id="efficiencyTag" class="text-5xl font-light mono text-amber-500">--%</div>
             </div>
@@ -193,26 +172,39 @@
             
             <table class="w-full text-left">
                 <thead class="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
-                    <tr>
-                        <th class="pb-4">Step</th>
-                        <th class="pb-4">Mass</th>
-                        <th class="pb-4">Freq</th>
-                        <th class="pb-4">Efficiency</th>
-                    </tr>
+                    <tr><th class="pb-4">Step</th><th class="pb-4">Mass</th><th class="pb-4">Freq</th><th class="pb-4">Efficiency</th></tr>
                 </thead>
-                <tbody id="historyBody" class="mono text-sm text-stone-600 divide-y divide-stone-100">
-                    </tbody>
+                <tbody id="historyBody" class="mono text-sm text-stone-600 divide-y divide-stone-100"></tbody>
             </table>
         </div>
-
     </main>
 
     <script>
         let currentPlate = 'front';
         let history = [];
 
-        // LIBRARY UPDATED: Added Martin 1-18 Parlour
+        // --- TONEWOOD DATABASE ---
+        // 'mod' is the stiffness modifier (Young's Modulus factor). 
+        // 1.0 = Standard ref (Euro Spruce / Maple). <1.0 = Softer. >1.0 = Stiffer.
+        const woods = {
+            front: [
+                {name: "European Spruce", mod: 1.0},
+                {name: "Sitka Spruce", mod: 1.08}, // Stiffer, allows slightly thinner
+                {name: "Cedrela (Spanish Cedar)", mod: 0.85} // Softer, requires thicker graduation
+            ],
+            back: [
+                {name: "European Maple", mod: 1.0},
+                {name: "Black Walnut", mod: 0.95},
+                {name: "Pearwood", mod: 0.92},
+                {name: "Cherry", mod: 0.94},
+                {name: "London Plane", mod: 0.90},
+                {name: "Honduran Mahogany", mod: 0.88},
+                {name: "Indian Rosewood", mod: 1.15} // Very stiff, allows thinner
+            ]
+        };
+
         const library = {
+            // VIOLIN FAMILY
             violin: { 
                 c: 5200, 
                 f_raw: {m:62, f:305, d:0.37, t:2.8, mode:'M5'}, 
@@ -242,45 +234,53 @@
                 back: {m:860, f:180, d:0.61, c:4100, t:9.5, mode:'M5'} 
             },
             
-            // VIOLS
+            // VIOLS (Added Back Phases)
             viol_jaye: { 
                 c: 5300,
                 f_raw: {m:142, f:112, d:0.36, t:2.3, mode:'M5'}, 
                 f_holes: {m:139, f:104, d:0.36, t:2.3, mode:'M5'}, 
                 f_barred: {m:155, f:130, d:0.36, t:2.3, mode:'M5'}, 
-                back: {m:220, f:124, d:0.62, c:4200, t:3.0, mode:'M5'} 
+                // Back Phases
+                b_raw: {m:220, f:124, d:0.62, c:4200, t:3.0, mode:'M5'},
+                b_soundpost: {m:235, f:140, d:0.62, c:4200, t:3.0, mode:'M5'} // Plate adds mass & stiffness
             },
             viol_colichon: { 
                 c: 5300,
                 f_raw: {m:205, f:85, d:0.36, t:3.0, mode:'M5'}, 
                 f_holes: {m:200, f:78, d:0.36, t:3.0, mode:'M5'}, 
                 f_barred: {m:225, f:105, d:0.36, t:3.0, mode:'M5'}, 
-                back: {m:320, f:98, d:0.62, c:4200, t:3.5, mode:'M5'} 
+                // Back Phases
+                b_raw: {m:320, f:98, d:0.62, c:4200, t:3.5, mode:'M5'},
+                b_soundpost: {m:335, f:115, d:0.62, c:4200, t:3.5, mode:'M5'}
             },
             
-            // GUITARS
+            // GUITARS (Added Back Phases)
             classical_hauser: { 
                 c: 5500,
                 f_raw: {m:130, f:95, d:0.40, t:2.4, mode:'M2'}, 
                 f_holes: {m:126, f:90, d:0.40, t:2.4, mode:'M2'}, 
                 f_braced: {m:175, f:185, d:0.40, t:2.4, mode:'M4'}, 
-                back: {m:210, f:220, d:0.82, c:4400, t:2.1, mode:'M5'} 
+                // Back Phases
+                b_raw: {m:210, f:120, d:0.82, c:4400, t:2.1, mode:'M2'},
+                b_braced: {m:245, f:220, d:0.82, c:4400, t:2.1, mode:'M5'} 
             },
             steel_string_om: { 
                 c: 5500,
                 f_raw: {m:145, f:102, d:0.43, t:2.6, mode:'M2'}, 
                 f_holes: {m:141, f:96, d:0.43, t:2.6, mode:'M2'}, 
                 f_braced: {m:210, f:205, d:0.43, t:2.6, mode:'M4'}, 
-                back: {m:240, f:240, d:0.85, c:4400, t:2.3, mode:'M5'} 
+                // Back Phases
+                b_raw: {m:240, f:125, d:0.85, c:4400, t:2.3, mode:'M2'},
+                b_braced: {m:285, f:240, d:0.85, c:4400, t:2.3, mode:'M5'} 
             },
             steel_string_parlour: { 
                 c: 5500,
-                // Parlour 1-18: Smaller body than OM, requiring lighter graduation.
                 f_raw: {m:118, f:110, d:0.40, t:2.4, mode:'M2'}, 
                 f_holes: {m:114, f:104, d:0.40, t:2.4, mode:'M2'}, 
                 f_braced: {m:160, f:215, d:0.40, t:2.4, mode:'M4'}, 
-                // Style 18 Mahogany back is lighter/less dense than Rosewood OM
-                back: {m:175, f:260, d:0.60, c:4200, t:2.4, mode:'M5'} 
+                // Style 18 Mahogany back
+                b_raw: {m:175, f:130, d:0.60, c:4200, t:2.4, mode:'M2'},
+                b_braced: {m:205, f:260, d:0.60, c:4200, t:2.4, mode:'M5'} 
             }
         };
 
@@ -288,20 +288,48 @@
             const inst = document.getElementById('instrument').value;
             const stepSel = document.getElementById('step');
             const archCont = document.getElementById('archingContainer');
+            const woodSel = document.getElementById('woodSpecies');
 
-            // Arching Visibility
+            // 1. Wood Selector Logic
+            woodSel.innerHTML = "";
+            const woodList = currentPlate === 'front' ? woods.front : woods.back;
+            woodList.forEach(w => {
+                const opt = document.createElement('option');
+                opt.value = w.mod;
+                opt.text = w.name;
+                woodSel.add(opt);
+            });
+
+            // 2. Arching Visibility
             const isViolinFamily = ['violin', 'viola', 'cello', 'bass_violin'].includes(inst);
             archCont.style.display = isViolinFamily ? 'block' : 'none';
 
-            // Milestone Steps
-            if (currentPlate === 'front') {
-                if (inst.includes('hauser') || inst.includes('om') || inst.includes('parlour')) {
+            // 3. Milestone Logic
+            stepSel.innerHTML = ""; // Clear existing
+            
+            // GUITARS
+            if (inst.includes('hauser') || inst.includes('om') || inst.includes('parlour')) {
+                if (currentPlate === 'front') {
                     stepSel.innerHTML = `<option value="f_raw">Raw Graduation</option><option value="f_holes">Soundhole Cut</option><option value="f_braced">Bracing Phase</option>`;
                 } else {
-                    stepSel.innerHTML = `<option value="f_raw">Plate Graduation</option><option value="f_holes">F-Holes / C-Holes Cut</option><option value="f_barred">Bass Bar Phase</option>`;
+                    stepSel.innerHTML = `<option value="b_raw">Raw Graduation</option><option value="b_braced">Bracing Phase</option>`;
                 }
-            } else {
-                stepSel.innerHTML = `<option value="back">Final Back Graduation</option>`;
+            } 
+            // VIOLS
+            else if (inst.includes('viol_')) {
+                if (currentPlate === 'front') {
+                    stepSel.innerHTML = `<option value="f_raw">Plate Graduation</option><option value="f_holes">C-Holes Cut</option><option value="f_barred">Bass Bar Phase</option>`;
+                } else {
+                    stepSel.innerHTML = `<option value="b_raw">Raw Graduation</option><option value="b_soundpost">Soundpost Plate Phase</option>`;
+                }
+            }
+            // VIOLIN FAMILY
+            else {
+                if (currentPlate === 'front') {
+                    stepSel.innerHTML = `<option value="f_raw">Plate Graduation</option><option value="f_holes">F-Holes Cut</option><option value="f_barred">Bass Bar Phase</option>`;
+                } else {
+                    stepSel.innerHTML = `<option value="back">Final Back Graduation</option>`;
+                }
             }
             calculate();
         }
@@ -327,29 +355,38 @@
             const arch = document.getElementById('arching').value;
             const dens = parseFloat(document.getElementById('density').value) || 0.37;
             const speedInput = parseFloat(document.getElementById('speed').value);
+            const woodMod = parseFloat(document.getElementById('woodSpecies').value) || 1.0;
             
-            // Ref Logic
-            const ref = library[inst][step] || library[inst].back;
+            // Reference Retrieval
+            let ref;
+            if (library[inst][step]) {
+                ref = library[inst][step];
+            } else if (currentPlate === 'back' && library[inst].back) {
+                ref = library[inst].back; // Fallback for simple violin backs
+            } else {
+                return; // Safety
+            }
+            
             const refC = library[inst].c || 5000;
 
             let tM = ref.m * (dens / ref.d);
             let tF = ref.f * Math.sqrt(ref.d / dens);
             
-            // Speed of Sound Correction
-            if (speedInput > 0) {
-                tF = tF * (speedInput / refC);
+            // Physics Adjustments
+            if (speedInput > 0) tF = tF * (speedInput / refC);
+            if (['violin', 'viola', 'cello', 'bass_violin'].includes(inst) && arch === 'high') { 
+                tM *= 0.94; tF *= 1.02; 
             }
 
-            // Arching correction
-            const isViolinFamily = ['violin', 'viola', 'cello', 'bass_violin'].includes(inst);
-            if (isViolinFamily && arch === 'high') { 
-                tM *= 0.94; 
-                tF *= 1.02; 
-            }
+            // Thickness Calculation with Wood Stiffness Modifier
+            // If woodMod < 1 (Softer), Thickness needs to be higher. T_new = T_old / sqrt(mod)? 
+            // Approx: Thickness scales inversely with stiffness to maintain freq. 
+            // We use a simplified scalar: 1/sqrt(mod).
+            const tThick = (ref.t * (ref.d / dens)) * (1 / Math.sqrt(woodMod));
             
             document.getElementById('targetMass').innerText = Math.round(tM);
             document.getElementById('targetFreq').innerText = Math.round(tF);
-            document.getElementById('predictedThickness').innerText = (ref.t * (ref.d / dens)).toFixed(1);
+            document.getElementById('predictedThickness').innerText = tThick.toFixed(1);
             document.getElementById('targetModeLabel').innerText = `Target Freq (${ref.mode})`;
             
             diagnose(); 
@@ -358,25 +395,44 @@
         function getDoctorAdvice(eff, inst, step) {
             let advice = {diag: "", comp: ""};
             
+            // --- CONTEXT AWARE DIAGNOSIS ---
+            const isGuitar = inst.includes('hauser') || inst.includes('om') || inst.includes('parlour');
+            const isViol = inst.includes('viol_');
+            const isViolinFam = !isGuitar && !isViol;
+
+            // STATUS DIAGNOSIS
             if (eff >= 97 && eff <= 103) {
                 advice.diag = "SYSTEM RATIONALIZED.";
-                advice.comp = "Efficiency is optimal. The plate's stiffness matches its mass. Do not remove more material. Proceed to surface preparation.";
+                advice.comp = "Efficiency is optimal. The plate's stiffness matches its mass. Proceed to next phase.";
             } else if (eff < 97) {
                 advice.diag = "SYSTEM DAMPED (Inefficient).";
-                if (inst.includes('viol_')) {
-                    advice.comp = "<b>Viol Specific:</b> The plate is too heavy for its stiffness. Thin the 'wings' (bouts). A viol needs flexible edges to function.";
+                // Too Heavy / Not Stiff Enough
+                if (isGuitar) {
+                    advice.comp = "The plate is too heavy for its stiffness. Reduce thickness at the **Lower Bout perimeter** (the 'active area'). Leave the center seam and bridge area structural.";
+                } else if (isViol) {
+                    advice.comp = "The plate is too heavy. Thin the **'Wings'** (upper and lower bouts) aggressively. A viol needs flexible edges to drive the air volume.";
                 } else {
-                    advice.comp = "The plate is carrying dead weight. Thin the 'Lungs' (recurve area) to shed mass without losing spine stiffness.";
+                    advice.comp = "The plate is carrying dead weight. Thin the **'Lungs'** (recurve area) to shed mass without compromising the central spine stiffness.";
                 }
             } else {
                 advice.diag = "SYSTEM OVER-STIFF (Brittle).";
-                advice.comp = "The plate is too stiff. It will lack bass response. Carefully reduce the central spine thickness.";
+                // Too Stiff / Too Light
+                if (isGuitar) {
+                    advice.comp = "The plate is too stiff; it will sound tight and lack bass. Carefully reduce the **Center Seam** thickness or scallop the braces further (if braced).";
+                } else if (isViol) {
+                    advice.comp = "The plate is too rigid. Viols rely on a flexible 'pump'. Reduce thickness across the entire center section.";
+                } else {
+                    advice.comp = "The plate is too stiff. It will lack bass response. Carefully reduce the **Central Spine** thickness (between the C-bouts).";
+                }
             }
 
-            if (step === 'f_holes') {
-                advice.comp += "<br><br><b>Note:</b> Expect a frequency drop. Do not chase the previous frequency by thinning.";
-            } else if (step === 'f_barred') {
-                advice.comp += "<br><br><b>Bass Bar:</b> Use the bar height to restore the frequency lost during the f-hole cutting.";
+            // STEP SPECIFIC ADVICE
+            if (step === 'b_soundpost' && isViol) {
+                const width = inst.includes('jaye') ? "9cm" : "7cm";
+                advice.comp += `<br><br><b>Soundpost Plate:</b> Glue a spruce veneer approx ${width} wide across the soundpost line. Thickness it until it matches the back plate's flexibility (approx equal thickness).`;
+            }
+            if (step.includes('braced') && isGuitar) {
+                advice.comp += "<br><br><b>Bracing Phase:</b> You are now tuning cross-grain stiffness (M4). Scallop the brace ends to release the perimeter.";
             }
 
             return advice;
@@ -388,18 +444,17 @@
             const tM = parseFloat(document.getElementById('targetMass').innerText);
             const tF = parseFloat(document.getElementById('targetFreq').innerText);
             
-            const effTag = document.getElementById('efficiencyTag');
-            const diagBox = document.getElementById('diagnosisBox');
-            const compAdvice = document.getElementById('compAdvice');
-
-            if (!cM || !cF) { effTag.innerText = "--%"; return; }
+            if (!cM || !cF) { 
+                document.getElementById('efficiencyTag').innerText = "--%"; 
+                return; 
+            }
 
             const eff = Math.round(((cF / cM) / (tF / tM)) * 100);
-            effTag.innerText = eff + "%";
+            document.getElementById('efficiencyTag').innerText = eff + "%";
 
             const advice = getDoctorAdvice(eff, document.getElementById('instrument').value, document.getElementById('step').value);
-            diagBox.innerText = advice.diag;
-            compAdvice.innerHTML = advice.comp;
+            document.getElementById('diagnosisBox').innerText = advice.diag;
+            document.getElementById('compAdvice').innerHTML = advice.comp;
         }
 
         function saveToLog() {
@@ -417,7 +472,7 @@
         function updateHistoryUI() {
             document.getElementById('historyBody').innerHTML = history.map(h => `
                 <tr class="group hover:bg-stone-50 transition">
-                    <td class="py-3 font-bold text-stone-400 text-[10px] uppercase tracking-wider">${h.step.replace('f_', '')}</td>
+                    <td class="py-3 font-bold text-stone-400 text-[10px] uppercase tracking-wider">${h.step.replace(/^[fb]_/, '')}</td>
                     <td class="py-3 text-stone-900">${h.mass}g</td>
                     <td class="py-3 text-stone-900">${h.freq}Hz</td>
                     <td class="py-3 text-amber-600 font-bold">${h.eff}</td>
