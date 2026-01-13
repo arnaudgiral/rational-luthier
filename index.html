@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rational Luthier v4.1</title>
+    <title>Rational Luthier v4.2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
@@ -33,16 +33,17 @@
             position: fixed; 
             z-index: 50; 
             left: 0; top: 0; width: 100%; height: 100%; 
-            background-color: rgba(0,0,0,0.5);
+            background-color: rgba(0,0,0,0.6);
             backdrop-filter: blur(4px);
         }
         .modal-content {
             background-color: #fff;
-            margin: 10% auto;
+            margin: 5% auto;
             padding: 40px;
             border: 1px solid #888;
-            width: 90%; max-width: 500px;
+            width: 90%; max-width: 600px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border-radius: 4px;
         }
     </style>
 </head>
@@ -51,20 +52,34 @@
     <div id="patternModal" class="modal">
         <div class="modal-content relative">
             <span class="absolute top-4 right-6 text-2xl font-bold cursor-pointer hover:text-amber-600" onclick="closeModal()">&times;</span>
-            <h3 class="text-xl font-bold uppercase tracking-wide mb-2">Mode Visualization</h3>
-            <p id="modalModeName" class="text-xs font-bold text-amber-600 uppercase tracking-widest mb-6">M5 - The Ring Mode</p>
+            <div class="flex justify-between items-end mb-6">
+                <div>
+                    <h3 class="text-xl font-bold uppercase tracking-wide">Mode Visualization</h3>
+                    <p id="modalModeName" class="text-xs font-bold text-amber-600 uppercase tracking-widest mt-1">M5 - The Ring Mode</p>
+                </div>
+                <div class="text-[10px] text-stone-400 font-bold uppercase tracking-widest text-right">
+                    <span id="modalInstType">Violin</span><br>
+                    <span id="modalStageType">Raw Plate</span>
+                </div>
+            </div>
             
-            <div id="modalSvg" class="w-full h-64 bg-stone-50 border border-stone-200 flex items-center justify-center mb-6">
+            <div id="modalSvg" class="w-full h-80 bg-stone-50 border border-stone-200 flex items-center justify-center mb-6 rounded-sm">
                 </div>
 
-            <div class="space-y-4 text-sm text-stone-600">
+            <div class="grid grid-cols-2 gap-4 text-sm text-stone-600 bg-stone-50 p-4 rounded-sm">
                 <div class="flex items-start">
-                    <span class="font-bold w-16 uppercase text-xs mt-1 text-stone-400">Hold</span>
-                    <p id="modalHoldText">Hold the plate firmly at the nodal line (blue dot).</p>
+                    <div class="w-3 h-3 rounded-full bg-blue-500 mt-1 mr-3 flex-shrink-0"></div>
+                    <div>
+                        <span class="font-bold uppercase text-xs text-stone-900">Hold Here (Node)</span>
+                        <p id="modalHoldText" class="text-xs mt-1 leading-relaxed">Hold firmly.</p>
+                    </div>
                 </div>
                 <div class="flex items-start">
-                    <span class="font-bold w-16 uppercase text-xs mt-1 text-stone-400">Tap</span>
-                    <p id="modalTapText">Tap quickly at the antinode (red target) to excite the mode.</p>
+                    <div class="w-3 h-3 rounded-full bg-red-500 mt-1 mr-3 flex-shrink-0"></div>
+                    <div>
+                        <span class="font-bold uppercase text-xs text-stone-900">Tap Here (Anti-Node)</span>
+                        <p id="modalTapText" class="text-xs mt-1 leading-relaxed">Tap quickly.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -73,7 +88,7 @@
     <aside class="lg:w-80 bg-white p-10 sidebar-border flex flex-col h-screen sticky top-0 overflow-y-auto">
         <header class="mb-10">
             <h1 class="text-2xl text-stone-900 uppercase">Rational <span class="text-amber-600">Luthier</span></h1>
-            <p class="text-[10px] font-bold text-stone-400 uppercase tracking-[0.2em] mt-2">Master Class v4.1</p>
+            <p class="text-[10px] font-bold text-stone-400 uppercase tracking-[0.2em] mt-2">Visualizer v4.2</p>
         </header>
 
         <div class="space-y-8 flex-1">
@@ -156,9 +171,11 @@
             <div class="stat-card relative">
                 <div class="flex justify-between items-center mb-4">
                     <h3 id="targetModeLabel" class="text-xs font-bold text-stone-400 uppercase tracking-widest">Target Freq</h3>
-                    <button onclick="openModal()" class="text-stone-400 hover:text-amber-600 transition" title="Show Chladni Pattern">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <button onclick="openModal()" class="text-stone-400 hover:text-amber-600 transition flex items-center gap-1 border border-stone-200 px-2 py-1 rounded-sm">
+                        <span class="text-[9px] font-bold uppercase">Show Tap</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                         </svg>
                     </button>
                 </div>
@@ -235,11 +252,10 @@
 
     <script>
         let currentPlate = 'front';
-        let currentRefMode = 'M5'; // Used for modal
+        let currentRefMode = 'M5'; 
         let history = [];
 
-        // --- TONEWOOD DATABASE (UPDATED) ---
-        // Range format: [min, max] for UI display
+        // --- TONEWOOD DATABASE ---
         const woods = {
             front: [
                 {name: "European Spruce", mod: 1.0, range: "0.36 - 0.44"},
@@ -248,11 +264,11 @@
             ],
             back: [
                 {name: "European Maple", mod: 1.0, range: "0.58 - 0.66"},
-                {name: "Walnut", mod: 0.95, range: "0.55 - 0.65"}, // Juglans Regia
+                {name: "Walnut", mod: 0.95, range: "0.55 - 0.65"}, 
                 {name: "Pearwood", mod: 0.92, range: "0.68 - 0.74"},
                 {name: "Cherry", mod: 0.94, range: "0.55 - 0.62"},
                 {name: "London Plane", mod: 0.90, range: "0.58 - 0.64"},
-                {name: "Mahogany", mod: 0.88, range: "0.48 - 0.58"}, // Honduran
+                {name: "Mahogany", mod: 0.88, range: "0.48 - 0.58"}, 
                 {name: "Indian Rosewood", mod: 1.15, range: "0.75 - 0.85"}
             ]
         };
@@ -333,6 +349,7 @@
             }
         };
 
+        // --- CORE UI FUNCTIONS ---
         function initProjectUI() {
             const inst = document.getElementById('instrument').value;
             const stepSel = document.getElementById('step');
@@ -346,7 +363,7 @@
                 const opt = document.createElement('option');
                 opt.value = w.mod;
                 opt.text = w.name;
-                opt.dataset.range = w.range; // Store range in data attribute
+                opt.dataset.range = w.range; 
                 woodSel.add(opt);
                 if(index === 0) document.getElementById('densityRange').innerText = "Range: " + w.range;
             });
@@ -395,7 +412,6 @@
             currentPlate = type;
             const btnF = document.getElementById('btnFront');
             const btnB = document.getElementById('btnBack');
-            
             if(type === 'front') {
                 btnF.className = "py-3 text-[10px] font-bold uppercase tracking-widest bg-stone-900 text-white transition";
                 btnB.className = "py-3 text-[10px] font-bold uppercase tracking-widest bg-white text-stone-400 hover:text-stone-900 transition";
@@ -423,7 +439,7 @@
                 return;
             }
             
-            currentRefMode = ref.mode; // Store for modal
+            currentRefMode = ref.mode; 
             const refC = library[inst].c || 5000;
 
             let tM = ref.m * (dens / ref.d);
@@ -451,35 +467,18 @@
 
             if (eff >= 97 && eff <= 103) {
                 advice.diag = "SYSTEM RATIONALIZED.";
-                advice.comp = "Efficiency is optimal. The plate's stiffness matches its mass. Proceed to next phase.";
+                advice.comp = "Efficiency is optimal. Proceed to next phase.";
             } else if (eff < 97) {
                 advice.diag = "SYSTEM DAMPED (Inefficient).";
-                if (isGuitar) {
-                    advice.comp = "The plate is too heavy for its stiffness. Reduce thickness at the **Lower Bout perimeter** (the 'active area'). Leave the center seam and bridge area structural.";
-                } else if (isViol) {
-                    advice.comp = "The plate is too heavy. Thin the **'Wings'** (upper and lower bouts) aggressively. A viol needs flexible edges to drive the air volume.";
-                } else {
-                    advice.comp = "The plate is carrying dead weight. Thin the **'Lungs'** (recurve area) to shed mass without compromising the central spine stiffness.";
-                }
+                if (isGuitar) advice.comp = "Too heavy. Reduce thickness at the **Lower Bout perimeter**.";
+                else if (isViol) advice.comp = "Too heavy. Thin the **'Wings'** (upper and lower bouts) aggressively.";
+                else advice.comp = "Too heavy. Thin the **'Lungs'** (recurve area).";
             } else {
                 advice.diag = "SYSTEM OVER-STIFF (Brittle).";
-                if (isGuitar) {
-                    advice.comp = "The plate is too stiff; it will sound tight and lack bass. Carefully reduce the **Center Seam** thickness or scallop the braces further (if braced).";
-                } else if (isViol) {
-                    advice.comp = "The plate is too rigid. Viols rely on a flexible 'pump'. Reduce thickness across the entire center section.";
-                } else {
-                    advice.comp = "The plate is too stiff. It will lack bass response. Carefully reduce the **Central Spine** thickness (between the C-bouts).";
-                }
+                if (isGuitar) advice.comp = "Too stiff. Reduce **Center Seam** thickness.";
+                else if (isViol) advice.comp = "Too rigid. Reduce thickness across the center section.";
+                else advice.comp = "Too stiff. Reduce **Central Spine** thickness.";
             }
-
-            if (step === 'b_soundpost' && isViol) {
-                const width = inst.includes('jaye') ? "9cm" : "7cm";
-                advice.comp += `<br><br><b>Soundpost Plate:</b> Glue a spruce veneer approx ${width} wide across the soundpost line. Thickness it until it matches the back plate's flexibility (approx equal thickness).`;
-            }
-            if (step.includes('braced') && isGuitar) {
-                advice.comp += "<br><br><b>Bracing Phase:</b> You are now tuning cross-grain stiffness (M4). Scallop the brace ends to release the perimeter.";
-            }
-
             return advice;
         }
 
@@ -489,26 +488,16 @@
             const tM = parseFloat(document.getElementById('targetMass').innerText);
             const tF = parseFloat(document.getElementById('targetFreq').innerText);
             
-            if (!cM || !cF) { 
-                document.getElementById('efficiencyTag').innerText = "--%"; 
-                return; 
-            }
-
+            if (!cM || !cF) { document.getElementById('efficiencyTag').innerText = "--%"; return; }
             const eff = Math.round(((cF / cM) / (tF / tM)) * 100);
             document.getElementById('efficiencyTag').innerText = eff + "%";
-
             const advice = getDoctorAdvice(eff, document.getElementById('instrument').value, document.getElementById('step').value);
             document.getElementById('diagnosisBox').innerText = advice.diag;
             document.getElementById('compAdvice').innerHTML = advice.comp;
         }
 
         function saveToLog() {
-            const log = {
-                step: document.getElementById('step').value,
-                mass: document.getElementById('currMass').value,
-                freq: document.getElementById('currFreq').value,
-                eff: document.getElementById('efficiencyTag').innerText
-            };
+            const log = { step: document.getElementById('step').value, mass: document.getElementById('currMass').value, freq: document.getElementById('currFreq').value, eff: document.getElementById('efficiencyTag').innerText };
             if(!log.mass || !log.freq) return;
             history.unshift(log);
             updateHistoryUI();
@@ -516,13 +505,7 @@
 
         function updateHistoryUI() {
             document.getElementById('historyBody').innerHTML = history.map(h => `
-                <tr class="group hover:bg-stone-50 transition">
-                    <td class="py-3 font-bold text-stone-400 text-[10px] uppercase tracking-wider">${h.step.replace(/^[fb]_/, '')}</td>
-                    <td class="py-3 text-stone-900">${h.mass}g</td>
-                    <td class="py-3 text-stone-900">${h.freq}Hz</td>
-                    <td class="py-3 text-amber-600 font-bold">${h.eff}</td>
-                </tr>
-            `).join('');
+                <tr class="group hover:bg-stone-50 transition"><td class="py-3 font-bold text-stone-400 text-[10px] uppercase tracking-wider">${h.step.replace(/^[fb]_/, '')}</td><td class="py-3 text-stone-900">${h.mass}g</td><td class="py-3 text-stone-900">${h.freq}Hz</td><td class="py-3 text-amber-600 font-bold">${h.eff}</td></tr>`).join('');
         }
 
         function exportHistory() {
@@ -531,61 +514,138 @@
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.setAttribute('hidden', '');
-            a.setAttribute('href', url);
-            a.setAttribute('download', 'luthier_workshop_log.csv');
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            a.setAttribute('hidden', ''); a.setAttribute('href', url); a.setAttribute('download', 'luthier_workshop_log.csv');
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
         }
 
-        // --- MODAL LOGIC FOR CHLADNI PATTERNS ---
+        // --- DYNAMIC SVG GENERATOR ---
         function openModal() {
             const modal = document.getElementById('patternModal');
             const modeName = document.getElementById('modalModeName');
             const svgContainer = document.getElementById('modalSvg');
             const holdText = document.getElementById('modalHoldText');
             const tapText = document.getElementById('modalTapText');
+            
+            const inst = document.getElementById('instrument').value;
+            const step = document.getElementById('step').value;
+            
+            // Labels
+            document.getElementById('modalInstType').innerText = inst.replace(/_/g, " ").toUpperCase();
+            document.getElementById('modalStageType').innerText = step.replace(/^[fb]_/, '').toUpperCase();
+
+            // determine family for logic
+            const isGuitar = inst.includes('hauser') || inst.includes('om') || inst.includes('parlour');
+            const isViol = inst.includes('viol_');
+            const isViolinFam = !isGuitar && !isViol;
 
             modal.style.display = "block";
             
-            // Generate SVG based on currentRefMode (M2, M5, M4)
-            let svgContent = '';
+            // SVG PATHS
+            const pGuitar = "M70,30 Q120,30 130,80 Q130,120 100,140 Q150,160 150,230 Q150,290 70,290 Q-10,290 -10,230 Q-10,160 40,140 Q10,120 10,80 Q20,30 70,30";
+            const pViolin = "M70,20 C100,20 110,60 110,80 C110,100 80,110 80,110 L110,120 C110,120 130,140 130,200 C130,260 70,280 70,280 C70,280 10,260 10,200 C10,140 30,120 30,120 L60,110 C60,110 30,100 30,80 C30,60 40,20 70,20";
+            const pViol = "M70,10 L90,40 C120,60 120,110 120,120 C120,140 90,150 90,150 C90,150 120,170 120,220 C120,280 70,290 70,290 C70,290 20,280 20,220 C20,170 50,150 50,150 C50,150 20,140 20,120 C20,110 20,60 50,40 L70,10";
+
+            let pathData = isGuitar ? pGuitar : (isViol ? pViol : pViolin);
             
-            if (currentRefMode === 'M2') {
-                
-                modeName.innerText = "M2 - The X-Mode (Longitudinal)";
-                holdText.innerText = "Hold the plate precisely in the CENTER (Node).";
-                tapText.innerText = "Tap the top corner or bottom center to excite the X shape.";
-                svgContent = `<svg viewBox="0 0 200 300" class="w-full h-full p-8"><path d="M50,20 C50,20 20,60 20,100 C20,180 10,200 10,250 C10,290 50,290 100,290 C150,290 190,290 190,250 C190,200 180,180 180,100 C180,60 150,20 150,20" fill="none" stroke="#e7e5e4" stroke-width="2"/><line x1="20" y1="20" x2="180" y2="280" stroke="#a8a29e" stroke-width="2" stroke-dasharray="5,5"/><line x1="180" y1="20" x2="20" y2="280" stroke="#a8a29e" stroke-width="2" stroke-dasharray="5,5"/><circle cx="100" cy="150" r="8" fill="#3b82f6" /><text x="115" y="155" font-size="12" fill="#3b82f6" font-family="sans-serif">HOLD</text><circle cx="100" cy="40" r="8" fill="#ef4444" /><text x="115" y="45" font-size="12" fill="#ef4444" font-family="sans-serif">TAP</text></svg>`;
-            } 
-            else if (currentRefMode === 'M5') {
-                
-                modeName.innerText = "M5 - The Ring Mode";
-                holdText.innerText = "Hold approx 20% down from top on the Node Line (Ring).";
-                tapText.innerText = "Tap dead center (The Bullseye).";
-                svgContent = `<svg viewBox="0 0 200 300" class="w-full h-full p-8"><path d="M50,20 C50,20 20,60 20,100 C20,180 10,200 10,250 C10,290 50,290 100,290 C150,290 190,290 190,250 C190,200 180,180 180,100 C180,60 150,20 150,20" fill="none" stroke="#e7e5e4" stroke-width="2"/><ellipse cx="100" cy="150" rx="60" ry="80" stroke="#a8a29e" stroke-width="2" stroke-dasharray="5,5" fill="none"/><circle cx="100" cy="70" r="8" fill="#3b82f6" /><text x="115" y="75" font-size="12" fill="#3b82f6" font-family="sans-serif">HOLD</text><circle cx="100" cy="150" r="8" fill="#ef4444" /><text x="115" y="155" font-size="12" fill="#ef4444" font-family="sans-serif">TAP</text></svg>`;
-            } 
-            else if (currentRefMode === 'M4') {
-                modeName.innerText = "M4 - The Cross Mode";
-                holdText.innerText = "Hold on the side edge (Node).";
-                tapText.innerText = "Tap near the bridge area but offset from center.";
-                svgContent = `<svg viewBox="0 0 200 300" class="w-full h-full p-8"><path d="M50,20 C50,20 20,60 20,100 C20,180 10,200 10,250 C10,290 50,290 100,290 C150,290 190,290 190,250 C190,200 180,180 180,100 C180,60 150,20 150,20" fill="none" stroke="#e7e5e4" stroke-width="2"/><path d="M20,150 Q100,150 180,150" stroke="#a8a29e" stroke-width="2" stroke-dasharray="5,5" fill="none"/><circle cx="20" cy="150" r="8" fill="#3b82f6" /><text x="35" y="155" font-size="12" fill="#3b82f6" font-family="sans-serif">HOLD</text><circle cx="100" cy="200" r="8" fill="#ef4444" /><text x="115" y="205" font-size="12" fill="#ef4444" font-family="sans-serif">TAP</text></svg>`;
+            // SVG Content Builder
+            let svg = `<svg viewBox="-20 0 180 300" class="w-full h-full p-4">`;
+            
+            // 1. Outline
+            svg += `<path d="${pathData}" fill="#fafaf9" stroke="#57534e" stroke-width="2"/>`;
+
+            // 2. Features (Holes/Braces)
+            // GUITARS
+            if(isGuitar) {
+                // Soundhole (All stages except maybe very raw, but helpful for orienting)
+                if(step.includes('holes') || step.includes('braced') || currentPlate === 'front') {
+                     svg += `<circle cx="70" cy="110" r="18" fill="#e7e5e4" stroke="#a8a29e" />`;
+                }
+                // Braces
+                if(step.includes('braced')) {
+                    if(inst.includes('hauser')) { // Fan
+                         svg += `<line x1="70" y1="150" x2="70" y2="250" stroke="#d6d3d1" stroke-width="2"/><line x1="60" y1="150" x2="40" y2="240" stroke="#d6d3d1" stroke-width="2"/><line x1="80" y1="150" x2="100" y2="240" stroke="#d6d3d1" stroke-width="2"/>`;
+                    } else { // X Brace (OM/Parlour)
+                        svg += `<line x1="30" y1="90" x2="110" y2="250" stroke="#d6d3d1" stroke-width="2"/><line x1="110" y1="90" x2="30" y2="250" stroke="#d6d3d1" stroke-width="2"/>`;
+                    }
+                }
+            }
+            // VIOLIN FAM
+            else if (isViolinFam) {
+                if(step.includes('holes') || step.includes('barred')) {
+                    // Stylized F-Holes
+                    svg += `<path d="M50,130 Q45,140 45,150 Q45,160 40,165" fill="none" stroke="#44403c" stroke-width="2"/>`;
+                    svg += `<path d="M90,130 Q95,140 95,150 Q95,160 100,165" fill="none" stroke="#44403c" stroke-width="2"/>`;
+                }
+                if(step.includes('barred')) {
+                    // Bass Bar
+                    svg += `<line x1="50" y1="100" x2="50" y2="200" stroke="#d6d3d1" stroke-width="3" opacity="0.5"/>`;
+                }
+            }
+            // VIOLS
+            else if (isViol) {
+                 if(step.includes('holes') || step.includes('barred')) {
+                    // C-Holes (facing each other like parentheses)
+                    svg += `<path d="M45,130 Q55,150 45,170" fill="none" stroke="#44403c" stroke-width="2"/>`;
+                    svg += `<path d="M95,130 Q85,150 95,170" fill="none" stroke="#44403c" stroke-width="2"/>`;
+                }
+                if(step.includes('soundpost')) {
+                    // Soundpost Plate
+                    svg += `<rect x="50" y="140" width="40" height="20" fill="#e7e5e4" stroke="#d6d3d1"/>`;
+                }
             }
 
-            svgContainer.innerHTML = svgContent;
+            // 3. Chladni Nodes & Dots
+            let nodePath = "";
+            let holdX, holdY, tapX, tapY;
+
+            if (currentRefMode === 'M5') { // Ring Mode
+                modeName.innerText = "M5 - The Ring Mode";
+                holdText.innerText = "Hold on the Node line (approx 20% down).";
+                tapText.innerText = "Tap dead center (The Bullseye).";
+                nodePath = `<ellipse cx="70" cy="180" rx="40" ry="55" fill="none" stroke="#a8a29e" stroke-width="2" stroke-dasharray="4,4"/>`;
+                holdX = 70; holdY = 125; 
+                tapX = 70; tapY = 180;
+            } 
+            else if (currentRefMode === 'M2') { // X Mode
+                modeName.innerText = "M2 - The X-Mode";
+                holdText.innerText = "Hold at the edge of the upper bout (where the node line exits).";
+                tapText.innerText = "Tap between the legs of the X (bottom center).";
+                nodePath = `<line x1="20" y1="40" x2="120" y2="280" stroke="#a8a29e" stroke-width="2" stroke-dasharray="4,4"/><line x1="120" y1="40" x2="20" y2="280" stroke="#a8a29e" stroke-width="2" stroke-dasharray="4,4"/>`;
+                // Practical hold point: Edge of upper bout on node line
+                holdX = 30; holdY = 60; 
+                tapX = 70; tapY = 260;
+            } 
+            else if (currentRefMode === 'M4') { // Cross Mode
+                modeName.innerText = "M4 - The Cross Mode";
+                holdText.innerText = "Hold on the edge (Node).";
+                tapText.innerText = "Tap near bridge area, offset from center.";
+                nodePath = `<path d="M10,180 Q70,180 130,180" fill="none" stroke="#a8a29e" stroke-width="2" stroke-dasharray="4,4"/>`;
+                holdX = 10; holdY = 180;
+                tapX = 90; tapY = 220;
+            }
+
+            svg += nodePath;
+            
+            // Draw Dots
+            // Hold (Blue)
+            svg += `<circle cx="${holdX}" cy="${holdY}" r="6" fill="#3b82f6" stroke="white" stroke-width="2"/>`;
+            // Tap (Red)
+            svg += `<circle cx="${tapX}" cy="${tapY}" r="6" fill="#ef4444" stroke="white" stroke-width="2"/>`;
+            // Targets
+            svg += `<line x1="${tapX-10}" y1="${tapY}" x2="${tapX+10}" y2="${tapY}" stroke="#ef4444" stroke-width="1" opacity="0.5"/>`;
+            svg += `<line x1="${tapX}" y1="${tapY-10}" x2="${tapX}" y2="${tapY+10}" stroke="#ef4444" stroke-width="1" opacity="0.5"/>`;
+
+            svg += `</svg>`;
+            svgContainer.innerHTML = svg;
         }
 
         function closeModal() {
             document.getElementById('patternModal').style.display = "none";
         }
 
-        // Close modal if clicking outside
         window.onclick = function(event) {
             const modal = document.getElementById('patternModal');
-            if (event.target == modal) {
-                modal.style.display = "none";
-            }
+            if (event.target == modal) modal.style.display = "none";
         }
 
         initProjectUI();
