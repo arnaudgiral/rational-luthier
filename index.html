@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rational Luthier v4.4</title>
+    <title>Rational Luthier v4.5</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
@@ -34,13 +34,13 @@
             <div id="modalSvg" class="w-full h-[500px] bg-stone-50 border border-stone-200 flex items-center justify-center mb-6 rounded-sm p-4">
                 </div>
             <div class="grid grid-cols-2 gap-4 text-sm text-stone-600 bg-stone-50 p-4 rounded-sm">
-                <div class="flex items-center">
-                    <div class="w-6 h-4 bg-red-300 opacity-60 mr-3 border border-red-400"></div>
-                    <div><span class="font-bold uppercase text-xs text-stone-900">Hold Zone (Node)</span><p id="modalHoldText" class="text-xs mt-1 leading-relaxed">Pinch plate here.</p></div>
+                <div class="flex items-start">
+                    <div class="w-3 h-3 rounded-full bg-blue-500 mt-1 mr-3 flex-shrink-0"></div>
+                    <div><span class="font-bold uppercase text-xs text-stone-900">Hold Here (Node)</span><p id="modalHoldText" class="text-xs mt-1 leading-relaxed">Hold firmly.</p></div>
                 </div>
-                <div class="flex items-center">
-                    <div class="w-6 h-6 rounded-full bg-red-300 opacity-60 mr-3 border border-red-400"></div>
-                    <div><span class="font-bold uppercase text-xs text-stone-900">Tap Zone (Anti-Node)</span><p id="modalTapText" class="text-xs mt-1 leading-relaxed">Tap center of zone.</p></div>
+                <div class="flex items-start">
+                    <div class="w-3 h-3 rounded-full bg-red-500 mt-1 mr-3 flex-shrink-0"></div>
+                    <div><span class="font-bold uppercase text-xs text-stone-900">Tap Here (Anti-Node)</span><p id="modalTapText" class="text-xs mt-1 leading-relaxed">Tap quickly.</p></div>
                 </div>
             </div>
         </div>
@@ -49,7 +49,7 @@
     <aside class="lg:w-80 bg-white p-10 sidebar-border flex flex-col h-screen sticky top-0 overflow-y-auto">
         <header class="mb-10">
             <h1 class="text-2xl text-stone-900 uppercase">Rational <span class="text-amber-600">Luthier</span></h1>
-            <p class="text-[10px] font-bold text-stone-400 uppercase tracking-[0.2em] mt-2">Luthier's Eye v4.4</p>
+            <p class="text-[10px] font-bold text-stone-400 uppercase tracking-[0.2em] mt-2">Precision Suite v4.5</p>
         </header>
         <div class="space-y-8 flex-1">
             <div class="space-y-2">
@@ -160,7 +160,7 @@
         function updateHistoryUI() { document.getElementById('historyBody').innerHTML = history.map(h => `<tr class="group hover:bg-stone-50 transition"><td class="py-3 font-bold text-stone-400 text-[10px] uppercase tracking-wider">${h.step.replace(/^[fb]_/, '')}</td><td class="py-3 text-stone-900">${h.mass}g</td><td class="py-3 text-stone-900">${h.freq}Hz</td><td class="py-3 text-amber-600 font-bold">${h.eff}</td></tr>`).join(''); }
         function exportHistory() { let csv = "Step,Mass(g),Freq(Hz),Efficiency\n"; history.forEach(h => { csv += `${h.step},${h.mass},${h.freq},${h.eff}\n`; }); const blob = new Blob([csv], { type: 'text/csv' }); const url = window.URL.createObjectURL(blob); const a = document.createElement('a'); a.setAttribute('hidden', ''); a.setAttribute('href', url); a.setAttribute('download', 'luthier_workshop_log.csv'); document.body.appendChild(a); a.click(); document.body.removeChild(a); }
 
-        // --- REBUILT SVG GENERATOR ---
+        // --- FIXED SVG GENERATOR (v4.5) ---
         function openModal() {
             const modal = document.getElementById('patternModal'); const modeName = document.getElementById('modalModeName'); const svgContainer = document.getElementById('modalSvg'); const holdText = document.getElementById('modalHoldText'); const tapText = document.getElementById('modalTapText');
             const inst = document.getElementById('instrument').value; const step = document.getElementById('step').value;
@@ -168,54 +168,63 @@
             const isGuitar = inst.includes('hauser') || inst.includes('om') || inst.includes('parlour'); const isViol = inst.includes('viol_'); const isViolinFam = !isGuitar && !isViol;
             modal.style.display = "block";
 
-            // Accurate Outlines
-            const pViolin = "M 75,20 C 95,20 115,30 120,55 C 125,80 110,100 105,105 L 115,115 C 135,125 145,155 145,190 C 145,240 110,270 75,270 C 40,270 5,240 5,190 C 5,155 15,125 35,115 L 45,105 C 40,100 25,80 30,55 C 35,30 55,20 75,20 Z";
-            const pViol = "M 75,10 C 100,15 115,35 120,65 C 125,95 110,125 105,135 C 100,145 125,160 125,200 C 125,240 100,260 75,265 C 50,260 25,240 25,200 C 25,160 50,145 45,135 C 40,125 25,95 30,65 C 35,35 50,15 75,10 Z";
-            const pGuitar = "M 75,20 C 100,20 125,35 125,75 C 125,110 105,125 105,125 C 105,125 135,145 135,195 C 135,235 100,250 75,255 C 50,250 15,235 15,195 C 15,145 45,125 45,125 C 45,125 25,110 25,75 C 25,35 50,20 75,20 Z";
+            // 1. COMPLEX PATHS (Manual "Move" and "Curve" logic to match reality)
+            // Violin: Proper Corners, recurve.
+            const pViolin = "M 75,20 C 100,20 120,35 125,60 C 128,75 126,85 125,90 L 115,95 C 110,97 108,105 108,115 C 108,125 110,133 115,135 L 125,140 C 126,145 130,145 140,165 C 145,180 148,200 148,210 C 148,245 115,265 75,265 C 35,265 2,245 2,210 C 2,200 5,180 10,165 C 20,145 24,145 25,140 L 35,135 C 40,133 42,125 42,115 C 42,105 40,97 35,95 L 25,90 C 24,85 22,75 25,60 C 30,35 50,20 75,20 Z";
+            
+            // Viol: Sloping shoulders (bottle shape), wider C-bouts.
+            const pViol = "M 75,10 L 85,10 C 105,25 120,70 120,95 C 120,105 105,115 105,115 C 105,115 100,125 100,145 C 100,165 105,175 105,175 C 105,175 125,185 125,215 C 125,250 100,265 75,265 C 50,265 25,250 25,215 C 25,185 45,175 45,175 C 45,175 50,165 50,145 C 50,125 45,115 45,115 C 45,115 30,105 30,95 C 30,70 45,25 65,10 L 75,10 Z";
+
+            // Guitar: Smooth waist, figure 8.
+            const pGuitar = "M 75,20 C 100,20 130,40 130,80 C 130,110 110,130 110,140 C 110,150 135,160 135,200 C 135,240 100,260 75,260 C 50,260 15,240 15,200 C 15,160 40,150 40,140 C 40,130 20,110 20,80 C 20,40 50,20 75,20 Z";
 
             let pathData = isGuitar ? pGuitar : (isViol ? pViol : pViolin);
             let svg = `<svg viewBox="0 0 150 280" class="w-full h-full">`;
-            svg += `<path d="${pathData}" fill="none" stroke="#57534e" stroke-width="1.5"/>`;
+            svg += `<path d="${pathData}" fill="none" stroke="#44403c" stroke-width="1.2"/>`;
 
-            // Features
+            // 2. Features
             if(isGuitar) {
-                if((step.includes('holes') || step.includes('braced')) && currentPlate === 'front') svg += `<circle cx="75" cy="95" r="16" fill="none" stroke="#a8a29e" stroke-width="1"/>`;
+                if((step.includes('holes') || step.includes('braced')) && currentPlate === 'front') svg += `<circle cx="75" cy="100" r="16" fill="none" stroke="#a8a29e" stroke-width="1"/>`;
                 if(step.includes('braced')) {
                     if(inst.includes('hauser')) svg += `<line x1="75" y1="130" x2="75" y2="220" stroke="#d6d3d1"/><line x1="65" y1="130" x2="45" y2="210" stroke="#d6d3d1"/><line x1="85" y1="130" x2="105" y2="210" stroke="#d6d3d1"/>`; 
                     else svg += `<line x1="35" y1="60" x2="115" y2="200" stroke="#d6d3d1"/><line x1="115" y1="60" x2="35" y2="200" stroke="#d6d3d1"/>`; 
                 }
             } else if (isViolinFam) {
-                if(step.includes('holes') || step.includes('barred')) svg += `<path d="M 55,125 Q 50,135 50,145 Q 50,155 45,160" fill="none" stroke="#44403c" stroke-width="1.5"/><path d="M 95,125 Q 100,135 100,145 Q 100,155 105,160" fill="none" stroke="#44403c" stroke-width="1.5"/>`;
-                if(step.includes('barred')) svg += `<line x1="55" y1="90" x2="55" y2="190" stroke="#d6d3d1" stroke-width="2.5" opacity="0.5" stroke-linecap="round"/>`;
+                if(step.includes('holes') || step.includes('barred')) svg += `<path d="M 58,115 Q 52,125 52,135 Q 52,145 48,150" fill="none" stroke="#44403c" stroke-width="1.5"/><path d="M 92,115 Q 98,125 98,135 Q 98,145 102,150" fill="none" stroke="#44403c" stroke-width="1.5"/>`;
+                if(step.includes('barred')) svg += `<line x1="55" y1="80" x2="55" y2="180" stroke="#d6d3d1" stroke-width="2.5" opacity="0.5" stroke-linecap="round"/>`;
             } else if (isViol) {
-                 if(step.includes('holes') || step.includes('barred')) svg += `<path d="M 50,125 Q 60,145 50,165" fill="none" stroke="#44403c" stroke-width="1.5"/><path d="M 100,125 Q 90,145 100,165" fill="none" stroke="#44403c" stroke-width="1.5"/>`;
-                if(step.includes('soundpost')) svg += `<rect x="55" y="135" width="40" height="15" fill="#e7e5e4" stroke="#d6d3d1" opacity="0.5"/>`;
+                 if(step.includes('holes') || step.includes('barred')) svg += `<path d="M 55,125 Q 65,145 55,165" fill="none" stroke="#44403c" stroke-width="1.5"/><path d="M 95,125 Q 85,145 95,165" fill="none" stroke="#44403c" stroke-width="1.5"/>`;
+                if(step.includes('soundpost')) svg += `<rect x="50" y="135" width="50" height="15" fill="#e7e5e4" stroke="#d6d3d1" opacity="0.5"/>`;
             }
 
-            // Authentic Chladni & Zones
-            let nodes = "", holdZones = "", tapZones = "";
+            // 3. Modes (Textured Sand) & Dots (Restored)
+            let nodes = "", holdX, holdY, tapX, tapY;
             if (currentRefMode === 'M5') { 
-                modeName.innerText = "M5 - The Ring Mode"; holdText.innerText = "Pinch plate edges within pink zones."; tapText.innerText = "Tap anywhere in center pink zone.";
-                // Textured Chladni Lines (M5)
-                nodes = `<path d="M 40,60 Q 75,90 110,60" stroke="#6b7280" stroke-width="4" stroke-dasharray="1,3" stroke-linecap="round" fill="none" opacity="0.7"/><path d="M 30,210 Q 60,190 75,210 Q 90,230 120,210" stroke="#6b7280" stroke-width="4" stroke-dasharray="1,3" stroke-linecap="round" fill="none" opacity="0.7"/>`;
-                // Hold Zones (Rects)
-                holdZones = `<rect x="15" y="85" width="15" height="25" fill="#fda4af" opacity="0.5" /><rect x="120" y="85" width="15" height="25" fill="#fda4af" opacity="0.5" /><rect x="10" y="175" width="15" height="25" fill="#fda4af" opacity="0.5" /><rect x="125" y="175" width="15" height="25" fill="#fda4af" opacity="0.5" />`;
-                // Tap Zone (Circle)
-                tapZones = `<circle cx="75" cy="145" r="25" fill="#fda4af" opacity="0.5" />`;
+                modeName.innerText = "M5 - The Ring Mode"; holdText.innerText = "Hold on the Node line (approx 20% down)."; tapText.innerText = "Tap dead center (The Bullseye).";
+                // Textured Sand Ring
+                nodes = `<path d="M 35,60 Q 75,90 115,60" stroke="#6b7280" stroke-width="5" stroke-dasharray="1,2" stroke-linecap="round" fill="none" opacity="0.6"/><path d="M 25,200 Q 60,180 75,200 Q 90,220 125,200" stroke="#6b7280" stroke-width="5" stroke-dasharray="1,2" stroke-linecap="round" fill="none" opacity="0.6"/>`;
+                // Dots
+                holdX = 75; holdY = 105; tapX = 75; tapY = 150;
+                svg += `<circle cx="20" cy="85" r="4" fill="#3b82f6" stroke="white"/><circle cx="130" cy="85" r="4" fill="#3b82f6" stroke="white"/><circle cx="20" cy="180" r="4" fill="#3b82f6" stroke="white"/><circle cx="130" cy="180" r="4" fill="#3b82f6" stroke="white"/>`; // 4 hold points for M5
             } 
             else if (currentRefMode === 'M2') { 
-                modeName.innerText = "M2 - The X-Mode"; holdText.innerText = "Pinch upper edge in pink zone."; tapText.innerText = "Tap lower area in pink zone.";
-                nodes = `<line x1="30" y1="40" x2="120" y2="240" stroke="#6b7280" stroke-width="4" stroke-dasharray="1,3" stroke-linecap="round" opacity="0.7"/><line x1="120" y1="40" x2="30" y2="240" stroke="#6b7280" stroke-width="4" stroke-dasharray="1,3" stroke-linecap="round" opacity="0.7"/>`;
-                holdZones = `<rect x="25" y="30" width="20" height="15" fill="#fda4af" opacity="0.5" />`;
-                tapZones = `<circle cx="75" cy="230" r="20" fill="#fda4af" opacity="0.5" />`;
+                modeName.innerText = "M2 - The X-Mode"; holdText.innerText = "Hold at the edge of the upper bout."; tapText.innerText = "Tap between the legs of the X.";
+                nodes = `<line x1="30" y1="40" x2="120" y2="240" stroke="#6b7280" stroke-width="5" stroke-dasharray="1,2" stroke-linecap="round" opacity="0.6"/><line x1="120" y1="40" x2="30" y2="240" stroke="#6b7280" stroke-width="5" stroke-dasharray="1,2" stroke-linecap="round" opacity="0.6"/>`;
+                tapX = 75; tapY = 220;
+                svg += `<circle cx="35" cy="40" r="4" fill="#3b82f6" stroke="white"/>`;
             } else if (currentRefMode === 'M4') { 
-                modeName.innerText = "M4 - The Cross Mode"; holdText.innerText = "Pinch side edge in pink zone."; tapText.innerText = "Tap offset area in pink zone.";
-                nodes = `<path d="M 15,150 Q 75,150 135,150" stroke="#6b7280" stroke-width="4" stroke-dasharray="1,3" stroke-linecap="round" opacity="0.7"/>`;
-                holdZones = `<rect x="5" y="140" width="15" height="20" fill="#fda4af" opacity="0.5" />`;
-                tapZones = `<circle cx="100" cy="180" r="15" fill="#fda4af" opacity="0.5" />`;
+                modeName.innerText = "M4 - The Cross Mode"; holdText.innerText = "Hold on the side edge (Node)."; tapText.innerText = "Tap near bridge area, offset from center.";
+                nodes = `<path d="M 15,150 Q 75,150 135,150" stroke="#6b7280" stroke-width="5" stroke-dasharray="1,2" stroke-linecap="round" opacity="0.6"/>`;
+                tapX = 95; tapY = 170;
+                svg += `<circle cx="15" cy="150" r="4" fill="#3b82f6" stroke="white"/>`;
             }
 
-            svg += nodes + holdZones + tapZones + `</svg>`;
+            svg += nodes;
+            // Tap Target
+            svg += `<circle cx="${tapX}" cy="${tapY}" r="6" fill="#ef4444" stroke="white" stroke-width="2"/>`; 
+            svg += `<line x1="${tapX-10}" y1="${tapY}" x2="${tapX+10}" y2="${tapY}" stroke="#ef4444" stroke-width="1" opacity="0.5"/>`; 
+            svg += `<line x1="${tapX}" y1="${tapY-10}" x2="${tapX}" y2="${tapY+10}" stroke="#ef4444" stroke-width="1" opacity="0.5"/>`;
+            svg += `</svg>`;
             svgContainer.innerHTML = svg;
         }
         function closeModal() { document.getElementById('patternModal').style.display = "none"; }
