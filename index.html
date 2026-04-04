@@ -1,235 +1,838 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rational Luthier v4.5</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-    <style>
-        :root { --primary: #1c1917; --accent: #d97706; --bg: #fafaf9; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--primary); }
-        h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.02em; }
-        .mono { font-family: 'JetBrains Mono', monospace; }
-        select, input { transition: all 0.2s; border: 1px solid #e7e5e4; }
-        select:focus, input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
-        .sidebar-border { border-right: 1px solid #e7e5e4; }
-        .stat-card { background: white; border: 1px solid #e7e5e4; padding: 2rem; transition: transform 0.2s; }
-        .stat-card:hover { transform: translateY(-2px); border-color: #d6d3d1; }
-        .doctor-panel { background-color: #1c1917; color: #fafaf9; }
-        .doctor-accent { border-left: 2px solid var(--accent); padding-left: 1.5rem; }
-        .modal { display: none; position: fixed; z-index: 50; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(4px); }
-        .modal-content { background-color: #fff; margin: 5% auto; padding: 40px; border: 1px solid #888; width: 90%; max-width: 600px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 4px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rational Luthier · v5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --esp:#1c0e07; --mah:#4a1e0e; --amb:#b87810; --amb2:#e09830;
+  --par:#f5ede0; --pap:#faf6f0; --stn:#e0d4c0; --mut:#7a6250;
+  --gd:#2d6832; --wn:#9a5c10; --dng:#8a1e1e;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Libre Baskerville',Georgia,serif;background:var(--par);color:var(--esp);display:flex;min-height:100vh}
+.mono{font-family:'IBM Plex Mono','Courier New',monospace}
+#sb{width:272px;min-width:272px;background:var(--pap);border-right:1px solid var(--stn);padding:1.6rem 1.4rem;display:flex;flex-direction:column;gap:1.15rem;overflow-y:auto;position:sticky;top:0;height:100vh}
+#mn{flex:1;padding:1.9rem 2.4rem;overflow-y:auto}
+.fl{display:block;font-size:.57rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin-bottom:.3rem;font-family:'IBM Plex Mono',monospace}
+select,input[type=number]{width:100%;background:var(--par);border:1px solid var(--stn);padding:.48rem .65rem;font-family:'Libre Baskerville',serif;font-size:.82rem;color:var(--esp);appearance:none;outline:none;transition:border-color .2s}
+select:focus,input[type=number]:focus{border-color:var(--amb)}
+.ptg{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--stn);overflow:hidden}
+.pb{padding:.5rem;font-family:'IBM Plex Mono',monospace;font-size:.6rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border:none;transition:all .2s}
+.pb.on{background:var(--esp);color:var(--par)}
+.pb:not(.on){background:var(--pap);color:var(--mut)}
+.pb:not(.on):hover{background:var(--stn)}
+.sc{background:var(--pap);border:1px solid var(--stn);padding:1.15rem 1.2rem}
+.sv{font-family:'IBM Plex Mono',monospace;font-size:2.1rem;line-height:1;margin-top:.3rem}
+.gtrack{height:5px;background:var(--stn);position:relative;margin-top:.55rem;overflow:hidden}
+.gfill{height:100%;transition:width .45s ease,background .45s ease;position:absolute;top:0;left:0}
+.gtgt{position:absolute;top:-3px;right:0;width:2px;height:11px;background:var(--esp)}
+#dp{background:var(--esp);color:var(--par);padding:1.6rem 1.8rem;margin-bottom:1.6rem}
+.di{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:var(--par);font-family:'IBM Plex Mono',monospace;font-size:1.5rem;width:100%;padding:.55rem .8rem;outline:none;transition:border-color .2s}
+.di:focus{border-color:var(--amb)}
+.di::placeholder{color:rgba(255,255,255,.18)}
+.ab{border-left:2px solid var(--amb);padding-left:.85rem}
+#mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(5px);z-index:100;align-items:center;justify-content:center}
+#mo.open{display:flex}
+#mb{background:var(--pap);width:92%;max-width:610px;max-height:92vh;overflow-y:auto;padding:1.6rem 1.9rem;box-shadow:0 40px 80px rgba(0,0,0,.45)}
+.mtb{display:flex;border:1px solid var(--stn);margin-bottom:1.15rem}
+.mt{flex:1;padding:.42rem;font-family:'IBM Plex Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border:none;background:var(--pap);color:var(--mut);transition:all .2s}
+.mt.on{background:var(--esp);color:var(--par)}
+@keyframes phA{0%,100%{opacity:.13}50%{opacity:.44}}
+@keyframes phB{0%,100%{opacity:.44}50%{opacity:.13}}
+@keyframes tapR{0%,100%{opacity:.18}50%{opacity:.62}}
+.phA{animation:phA 2.1s ease-in-out infinite}
+.phB{animation:phB 2.1s ease-in-out infinite}
+.tapRing{animation:tapR 1.8s ease-in-out infinite}
+#lt{width:100%;border-collapse:collapse}
+#lt th{font-family:'IBM Plex Mono',monospace;font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);padding-bottom:.55rem;text-align:left;border-bottom:1px solid var(--stn)}
+#lt td{font-family:'IBM Plex Mono',monospace;font-size:.74rem;padding:.45rem 0;border-bottom:1px solid rgba(0,0,0,.04)}
+@media(max-width:920px){body{flex-direction:column}#sb{width:100%;height:auto;position:static}}
+</style>
 </head>
-<body class="min-h-screen flex flex-col lg:flex-row antialiased">
+<body>
 
-    <div id="patternModal" class="modal">
-        <div class="modal-content relative">
-            <span class="absolute top-4 right-6 text-2xl font-bold cursor-pointer hover:text-amber-600" onclick="closeModal()">&times;</span>
-            <div class="flex justify-between items-end mb-6">
-                <div><h3 class="text-xl font-bold uppercase tracking-wide">Mode Visualization</h3><p id="modalModeName" class="text-xs font-bold text-amber-600 uppercase tracking-widest mt-1">M5 - The Ring Mode</p></div>
-                <div class="text-[10px] text-stone-400 font-bold uppercase tracking-widest text-right"><span id="modalInstType">Violin</span><br><span id="modalStageType">Raw Plate</span></div>
-            </div>
-            <div id="modalSvg" class="w-full h-[500px] bg-stone-50 border border-stone-200 flex items-center justify-center mb-6 rounded-sm p-4">
-                </div>
-            <div class="grid grid-cols-2 gap-4 text-sm text-stone-600 bg-stone-50 p-4 rounded-sm">
-                <div class="flex items-start">
-                    <div class="w-3 h-3 rounded-full bg-blue-500 mt-1 mr-3 flex-shrink-0"></div>
-                    <div><span class="font-bold uppercase text-xs text-stone-900">Hold Here (Node)</span><p id="modalHoldText" class="text-xs mt-1 leading-relaxed">Hold firmly.</p></div>
-                </div>
-                <div class="flex items-start">
-                    <div class="w-3 h-3 rounded-full bg-red-500 mt-1 mr-3 flex-shrink-0"></div>
-                    <div><span class="font-bold uppercase text-xs text-stone-900">Tap Here (Anti-Node)</span><p id="modalTapText" class="text-xs mt-1 leading-relaxed">Tap quickly.</p></div>
-                </div>
-            </div>
+<!-- SIDEBAR -->
+<aside id="sb">
+  <header>
+    <h1 style="font-size:1.1rem;letter-spacing:-.02em;line-height:1.2">Rational<br><span style="color:var(--amb)">Luthier</span></h1>
+    <p class="mono" style="font-size:.54rem;color:var(--mut);letter-spacing:.18em;margin-top:.28rem">PRECISION SUITE — v5.0</p>
+  </header>
+  <hr style="border:none;border-top:1px solid var(--stn)">
+  <div>
+    <label class="fl">Instrument</label>
+    <select id="instrument" onchange="initUI()">
+      <optgroup label="Violin Family">
+        <option value="violin">Violin (35.5 cm)</option>
+        <option value="viola">Viola (41 cm)</option>
+        <option value="cello">Cello (75.5 cm)</option>
+        <option value="bass_violin">Bass Violin (80 cm)</option>
+      </optgroup>
+      <optgroup label="Viols">
+        <option value="viol_jaye">Bass Viol — Jaye (62 cm)</option>
+        <option value="viol_colichon">Bass Viol — Colichon (70 cm)</option>
+      </optgroup>
+      <optgroup label="Guitars">
+        <option value="classical_hauser">Classical — Hauser</option>
+        <option value="steel_string_om">Steel String — OM</option>
+        <option value="steel_string_parlour">Parlour — Martin 1-18</option>
+      </optgroup>
+    </select>
+  </div>
+  <div>
+    <label class="fl">Plate</label>
+    <div class="ptg">
+      <button id="btnFront" class="pb on" onclick="setPlate('front')">Front</button>
+      <button id="btnBack" class="pb" onclick="setPlate('back')">Back</button>
+    </div>
+  </div>
+  <div>
+    <label class="fl">Tonewood Species</label>
+    <select id="woodSpecies" onchange="updateDensRange();calc()"></select>
+  </div>
+  <div id="archCont">
+    <label class="fl">Arch Geometry</label>
+    <select id="arching" onchange="calc()">
+      <option value="flat">Low Arch (Strad)</option>
+      <option value="high">High Arch (Amati)</option>
+    </select>
+  </div>
+  <div>
+    <label class="fl">Workflow Stage</label>
+    <select id="step" style="background:#fdf8ec;border-color:#cca030" onchange="calc()"></select>
+  </div>
+  <hr style="border:none;border-top:1px solid var(--stn)">
+  <div>
+    <label class="fl">Wood Properties</label>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-top:.35rem">
+      <div>
+        <span class="mono" style="font-size:.54rem;color:var(--mut);display:block;margin-bottom:.22rem">DENSITY g/cm³</span>
+        <input type="number" id="density" value="0.37" step="0.01" oninput="calc()">
+        <span id="densityRange" class="mono" style="font-size:.54rem;color:var(--amb);display:block;margin-top:.18rem">0.36–0.44</span>
+      </div>
+      <div>
+        <span class="mono" style="font-size:.54rem;color:var(--mut);display:block;margin-bottom:.22rem">SPEED m/s</span>
+        <input type="number" id="speed" placeholder="~5200" oninput="calc()">
+        <span class="mono" style="font-size:.54rem;color:var(--mut);display:block;margin-top:.18rem">optional</span>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main id="mn">
+
+  <!-- STAT CARDS -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.1rem;margin-bottom:1.5rem">
+
+    <div class="sc">
+      <div class="fl" style="margin-bottom:0">Target Mass</div>
+      <div class="sv" id="targetMass">—</div>
+      <div class="mono" style="font-size:.6rem;color:var(--mut);margin-top:.12rem">grams</div>
+      <div style="margin-top:.8rem">
+        <div style="display:flex;justify-content:space-between;margin-bottom:.18rem">
+          <span class="mono" style="font-size:.52rem;color:var(--mut)">CURRENT</span>
+          <span class="mono" id="massGLbl" style="font-size:.52rem;color:var(--mut)">—</span>
         </div>
+        <div class="gtrack"><div class="gfill" id="massGF" style="width:0%;background:var(--stn)"></div><div class="gtgt"></div></div>
+      </div>
     </div>
 
-    <aside class="lg:w-80 bg-white p-10 sidebar-border flex flex-col h-screen sticky top-0 overflow-y-auto">
-        <header class="mb-10">
-            <h1 class="text-2xl text-stone-900 uppercase">Rational <span class="text-amber-600">Luthier</span></h1>
-            <p class="text-[10px] font-bold text-stone-400 uppercase tracking-[0.2em] mt-2">Precision Suite v4.5</p>
-        </header>
-        <div class="space-y-8 flex-1">
-            <div class="space-y-2">
-                <label class="text-[10px] font-bold uppercase tracking-widest text-stone-400">Project Profile</label>
-                <select id="instrument" class="w-full bg-stone-50 p-3 text-sm font-bold text-stone-700 rounded-none" onchange="initProjectUI()">
-                    <optgroup label="Violin Family"><option value="violin">Violin (35.5cm)</option><option value="viola">Viola (41cm)</option><option value="cello">Cello (75.5cm)</option><option value="bass_violin">Bass Violin (80cm)</option></optgroup>
-                    <optgroup label="Viols"><option value="viol_jaye">Bass Viol (Jaye - 62cm)</option><option value="viol_colichon">Bass Viol (Colichon - 70cm)</option></optgroup>
-                    <optgroup label="Guitars"><option value="classical_hauser">Classical (Hauser)</option><option value="steel_string_om">Steel String (OM)</option><option value="steel_string_parlour">Parlour (Martin 1-18)</option></optgroup>
-                </select>
-            </div>
-            <div class="grid grid-cols-2 gap-0 border border-stone-200">
-                <button id="btnFront" onclick="setPlate('front')" class="py-3 text-[10px] font-bold uppercase tracking-widest bg-stone-900 text-white transition">Front</button>
-                <button id="btnBack" onclick="setPlate('back')" class="py-3 text-[10px] font-bold uppercase tracking-widest bg-white text-stone-400 hover:text-stone-900 transition">Back</button>
-            </div>
-            <div class="space-y-2">
-                <label class="text-[10px] font-bold uppercase tracking-widest text-stone-400">Tonewood Species</label>
-                <select id="woodSpecies" class="w-full bg-stone-50 p-3 text-sm font-bold text-stone-700 rounded-none" onchange="updateDensityRange(); calculate();"></select>
-            </div>
-            <div id="archingContainer" class="space-y-2">
-                <label class="text-[10px] font-bold uppercase tracking-widest text-stone-400">Arch Geometry</label>
-                <select id="arching" class="w-full bg-stone-50 p-3 text-sm font-bold text-stone-700 rounded-none" onchange="calculate()">
-                    <option value="flat">Low Arch (Strad)</option>
-                    <option value="high">High Arch (Amati)</option>
-                </select>
-            </div>
-            <div class="space-y-2">
-                <label class="text-[10px] font-bold uppercase tracking-widest text-stone-400">Workflow Stage</label>
-                <select id="step" class="w-full bg-amber-50 p-3 text-sm font-bold text-amber-900 rounded-none border-amber-100" onchange="calculate()"></select>
-            </div>
-            <hr class="border-stone-100">
-            <div class="space-y-4">
-                <label class="text-[10px] font-bold uppercase tracking-widest text-stone-400">Material Physics</label>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <span class="block text-[9px] font-bold text-stone-500 mb-1">DENSITY (ρ)</span>
-                        <input type="number" id="density" value="0.37" step="0.01" class="w-full bg-transparent border-b border-stone-300 py-1 font-mono text-sm focus:border-amber-500" oninput="calculate()">
-                        <span id="densityRange" class="block text-[9px] text-amber-600 mt-1 font-mono">Range: 0.34 - 0.40</span>
-                    </div>
-                    <div>
-                        <span class="block text-[9px] font-bold text-stone-500 mb-1">SPEED (m/s)</span>
-                        <input type="number" id="speed" placeholder="~5200" class="w-full bg-transparent border-b border-stone-300 py-1 font-mono text-sm focus:border-amber-500" oninput="calculate()">
-                    </div>
-                </div>
-            </div>
+    <div class="sc">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div class="fl" id="targetModeLabel" style="margin-bottom:0">Target Freq</div>
+          <div class="sv" id="targetFreq">—</div>
+          <div style="display:flex;align-items:center;gap:.35rem;margin-top:.12rem">
+            <span class="mono" style="font-size:.6rem;color:var(--mut)">Hz</span>
+            <span class="mono" id="noteLabel" style="font-size:.6rem;color:var(--amb)"></span>
+          </div>
         </div>
-    </aside>
-
-    <main class="flex-1 p-8 lg:p-16 overflow-y-auto">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            <div class="stat-card">
-                <h3 class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-4">Target Mass</h3>
-                <div class="flex items-baseline"><span id="targetMass" class="text-4xl font-light text-stone-900 mono">--</span><span class="ml-2 text-xs font-bold text-stone-400">g</span></div>
-            </div>
-            <div class="stat-card relative">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 id="targetModeLabel" class="text-xs font-bold text-stone-400 uppercase tracking-widest">Target Freq</h3>
-                    <button onclick="openModal()" class="text-stone-400 hover:text-amber-600 transition flex items-center gap-1 border border-stone-200 px-2 py-1 rounded-sm">
-                        <span class="text-[9px] font-bold uppercase">Show Tap</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                    </button>
-                </div>
-                <div class="flex items-baseline"><span id="targetFreq" class="text-4xl font-light text-stone-900 mono">--</span><span class="ml-2 text-xs font-bold text-stone-400">Hz</span></div>
-            </div>
-            <div class="stat-card border-amber-200 bg-amber-50/30">
-                <h3 class="text-xs font-bold text-amber-600 uppercase tracking-widest mb-4">Est. Thickness</h3>
-                <div class="flex items-baseline"><span id="predictedThickness" class="text-4xl font-light text-amber-700 mono">--</span><span class="ml-2 text-xs font-bold text-amber-600">mm</span></div>
-            </div>
+        <button onclick="openModal()" style="border:1px solid var(--stn);background:var(--par);padding:.3rem .5rem;cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:.54rem;color:var(--mut);text-transform:uppercase;letter-spacing:.09em;transition:all .2s;margin-top:.1rem;white-space:nowrap" onmouseover="this.style.borderColor='var(--amb)';this.style.color='var(--esp)'" onmouseout="this.style.borderColor='var(--stn)';this.style.color='var(--mut)'">TAP MAP ↗</button>
+      </div>
+      <div style="margin-top:.8rem">
+        <div style="display:flex;justify-content:space-between;margin-bottom:.18rem">
+          <span class="mono" style="font-size:.52rem;color:var(--mut)">CURRENT</span>
+          <span class="mono" id="freqGLbl" style="font-size:.52rem;color:var(--mut)">—</span>
         </div>
-        <section class="doctor-panel rounded-sm shadow-2xl p-10 lg:p-12 mb-12">
-            <div class="flex justify-between items-start border-b border-stone-800 pb-8 mb-8">
-                <div><h2 class="text-2xl font-light tracking-wide text-white uppercase">Diagnosis Engine</h2><p class="text-xs text-stone-500 mt-2 uppercase tracking-widest">Acoustic Analysis System</p></div>
-                <div id="efficiencyTag" class="text-5xl font-light mono text-amber-500">--%</div>
-            </div>
-            <div class="grid grid-cols-1 xl:grid-cols-2 gap-12">
-                <div class="space-y-8">
-                    <div class="grid grid-cols-2 gap-8">
-                        <div><label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-2">Mass (g)</label><input type="number" id="currMass" placeholder="0" class="w-full bg-stone-900 border border-stone-800 text-white p-4 font-mono text-2xl focus:border-amber-600 rounded-sm" oninput="diagnose()"></div>
-                        <div><label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-2">Frequency (Hz)</label><input type="number" id="currFreq" placeholder="0" class="w-full bg-stone-900 border border-stone-800 text-white p-4 font-mono text-2xl focus:border-amber-600 rounded-sm" oninput="diagnose()"></div>
-                    </div>
-                    <button onclick="saveToLog()" class="w-full py-4 border border-stone-700 hover:bg-stone-800 text-stone-300 text-xs font-bold uppercase tracking-[0.2em] transition">Log Measurement</button>
-                </div>
-                <div class="space-y-8 font-light">
-                    <div class="doctor-accent"><h4 class="text-[10px] font-bold text-amber-500 uppercase tracking-widest mb-2">System Status</h4><p id="diagnosisBox" class="text-lg text-stone-100 italic">Waiting for input...</p></div>
-                    <div class="doctor-accent"><h4 class="text-[10px] font-bold text-amber-500 uppercase tracking-widest mb-2">Prescription</h4><p id="compAdvice" class="text-sm text-stone-400 leading-relaxed">Select an instrument to begin analysis.</p></div>
-                </div>
-            </div>
-        </section>
-        <div class="space-y-6">
-            <div class="flex justify-between items-end border-b border-stone-200 pb-4">
-                <h3 class="text-lg font-bold text-stone-900 uppercase">Workbench Log</h3>
-                <button onclick="exportHistory()" class="text-[10px] font-bold text-stone-400 hover:text-stone-900 uppercase tracking-widest transition cursor-pointer">↓ Download CSV</button>
-            </div>
-            <table class="w-full text-left"><thead class="text-[10px] font-bold text-stone-400 uppercase tracking-widest"><tr><th class="pb-4">Step</th><th class="pb-4">Mass</th><th class="pb-4">Freq</th><th class="pb-4">Efficiency</th></tr></thead><tbody id="historyBody" class="mono text-sm text-stone-600 divide-y divide-stone-100"></tbody></table>
+        <div class="gtrack"><div class="gfill" id="freqGF" style="width:0%;background:var(--stn)"></div><div class="gtgt"></div></div>
+      </div>
+    </div>
+
+    <div class="sc" style="border-color:#cca030;background:#fdf8ec">
+      <div class="fl" style="margin-bottom:0;color:var(--amb)">Est. Thickness</div>
+      <div class="sv" id="predictedThickness" style="color:var(--mah)">—</div>
+      <div class="mono" style="font-size:.6rem;color:var(--amb);margin-top:.12rem">mm</div>
+      <p id="thickNote" class="mono" style="font-size:.54rem;color:var(--mut);margin-top:.6rem;line-height:1.5"></p>
+    </div>
+
+  </div>
+
+  <!-- DIAGNOSIS PANEL -->
+  <div id="dp">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:1.1rem;margin-bottom:1.1rem">
+      <div>
+        <h2 style="font-size:1.05rem;font-weight:700;color:var(--par);letter-spacing:-.01em">Diagnosis Engine</h2>
+        <p class="mono" style="font-size:.54rem;color:rgba(255,255,255,.28);letter-spacing:.14em;margin-top:.22rem">ACOUSTIC ANALYSIS SYSTEM</p>
+      </div>
+      <div id="effTag" class="mono" style="font-size:2.1rem;color:var(--amb);line-height:1">--%</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+
+      <div style="display:flex;flex-direction:column;gap:.8rem">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
+          <div>
+            <label style="display:block;font-family:'IBM Plex Mono',monospace;font-size:.54rem;color:rgba(255,255,255,.32);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.3rem">Mass (g)</label>
+            <input type="number" id="currMass" placeholder="0" class="di" oninput="diagnose()">
+          </div>
+          <div>
+            <label style="display:block;font-family:'IBM Plex Mono',monospace;font-size:.54rem;color:rgba(255,255,255,.32);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.3rem">Freq (Hz)</label>
+            <input type="number" id="currFreq" placeholder="0" class="di" oninput="diagnose()">
+          </div>
         </div>
-    </main>
 
-    <script>
-        let currentPlate = 'front'; let currentRefMode = 'M5'; let history = [];
-        const woods = { front: [{name:"European Spruce",mod:1.0,range:"0.36 - 0.44"},{name:"Sitka Spruce",mod:1.08,range:"0.39 - 0.48"},{name:"Cedrela (Spanish Cedar)",mod:0.85,range:"0.33 - 0.39"}], back: [{name:"European Maple",mod:1.0,range:"0.58 - 0.66"},{name:"Walnut",mod:0.95,range:"0.55 - 0.65"},{name:"Pearwood",mod:0.92,range:"0.68 - 0.74"},{name:"Cherry",mod:0.94,range:"0.55 - 0.62"},{name:"London Plane",mod:0.90,range:"0.58 - 0.64"},{name:"Mahogany",mod:0.88,range:"0.48 - 0.58"},{name:"Indian Rosewood",mod:1.15,range:"0.75 - 0.85"}] };
-        const library = { violin: { c:5200, f_raw:{m:62,f:305,d:0.37,t:2.8,mode:'M5'}, f_holes:{m:60,f:288,d:0.37,t:2.8,mode:'M5'}, f_barred:{m:65,f:340,d:0.37,t:2.8,mode:'M5'}, back:{m:105,f:360,d:0.59,c:4200,t:4.2,mode:'M5'}}, viola: { c:5200, f_raw:{m:95,f:265,d:0.38,t:3.1,mode:'M5'}, f_holes:{m:92,f:250,d:0.38,t:3.1,mode:'M5'}, f_barred:{m:102,f:305,d:0.38,t:3.1,mode:'M5'}, back:{m:160,f:325,d:0.59,c:4200,t:4.8,mode:'M5'}}, cello: { c:5100, f_raw:{m:370,f:142,d:0.36,t:5.2,mode:'M5'}, f_holes:{m:362,f:135,d:0.36,t:5.2,mode:'M5'}, f_barred:{m:410,f:168,d:0.36,t:5.2,mode:'M5'}, back:{m:650,f:185,d:0.61,c:4000,t:8.0,mode:'M5'}}, bass_violin: { c:5000, f_raw:{m:430,f:125,d:0.35,t:6.5,mode:'M5'}, f_holes:{m:420,f:116,d:0.35,t:6.5,mode:'M5'}, f_barred:{m:465,f:155,d:0.35,t:6.5,mode:'M5'}, back:{m:860,f:180,d:0.61,c:4100,t:9.5,mode:'M5'}}, viol_jaye: { c:5300, f_raw:{m:142,f:112,d:0.36,t:2.3,mode:'M5'}, f_holes:{m:139,f:104,d:0.36,t:2.3,mode:'M5'}, f_barred:{m:155,f:130,d:0.36,t:2.3,mode:'M5'}, b_raw:{m:220,f:124,d:0.62,c:4200,t:3.0,mode:'M5'}, b_soundpost:{m:235,f:140,d:0.62,c:4200,t:3.0,mode:'M5'}}, viol_colichon: { c:5300, f_raw:{m:205,f:85,d:0.36,t:3.0,mode:'M5'}, f_holes:{m:200,f:78,d:0.36,t:3.0,mode:'M5'}, f_barred:{m:225,f:105,d:0.36,t:3.0,mode:'M5'}, b_raw:{m:320,f:98,d:0.62,c:4200,t:3.5,mode:'M5'}, b_soundpost:{m:335,f:115,d:0.62,c:4200,t:3.5,mode:'M5'}}, classical_hauser: { c:5500, f_raw:{m:130,f:95,d:0.40,t:2.4,mode:'M2'}, f_holes:{m:126,f:90,d:0.40,t:2.4,mode:'M2'}, f_braced:{m:175,f:185,d:0.40,t:2.4,mode:'M4'}, b_raw:{m:210,f:120,d:0.82,c:4400,t:2.1,mode:'M2'}, b_braced:{m:245,f:220,d:0.82,c:4400,t:2.1,mode:'M5'}}, steel_string_om: { c:5500, f_raw:{m:145,f:102,d:0.43,t:2.6,mode:'M2'}, f_holes:{m:141,f:96,d:0.43,t:2.6,mode:'M2'}, f_braced:{m:210,f:205,d:0.43,t:2.6,mode:'M4'}, b_raw:{m:240,f:125,d:0.85,c:4400,t:2.3,mode:'M2'}, b_braced:{m:285,f:240,d:0.85,c:4400,t:2.3,mode:'M5'}}, steel_string_parlour: { c:5500, f_raw:{m:118,f:110,d:0.40,t:2.4,mode:'M2'}, f_holes:{m:114,f:104,d:0.40,t:2.4,mode:'M2'}, f_braced:{m:160,f:215,d:0.40,t:2.4,mode:'M4'}, b_raw:{m:175,f:130,d:0.60,c:4200,t:2.4,mode:'M2'}, b_braced:{m:205,f:260,d:0.60,c:4200,t:2.4,mode:'M5'}}};
-        function initProjectUI() { const inst = document.getElementById('instrument').value; const stepSel = document.getElementById('step'); const archCont = document.getElementById('archingContainer'); const woodSel = document.getElementById('woodSpecies'); woodSel.innerHTML = ""; const woodList = currentPlate === 'front' ? woods.front : woods.back; woodList.forEach((w, index) => { const opt = document.createElement('option'); opt.value = w.mod; opt.text = w.name; opt.dataset.range = w.range; woodSel.add(opt); if(index === 0) document.getElementById('densityRange').innerText = "Range: " + w.range; }); const isViolinFamily = ['violin', 'viola', 'cello', 'bass_violin'].includes(inst); archCont.style.display = isViolinFamily ? 'block' : 'none'; stepSel.innerHTML = ""; if (inst.includes('hauser') || inst.includes('om') || inst.includes('parlour')) { if (currentPlate === 'front') stepSel.innerHTML = `<option value="f_raw">Raw Graduation</option><option value="f_holes">Soundhole Cut</option><option value="f_braced">Bracing Phase</option>`; else stepSel.innerHTML = `<option value="b_raw">Raw Graduation</option><option value="b_braced">Bracing Phase</option>`; } else if (inst.includes('viol_')) { if (currentPlate === 'front') stepSel.innerHTML = `<option value="f_raw">Plate Graduation</option><option value="f_holes">C-Holes Cut</option><option value="f_barred">Bass Bar Phase</option>`; else stepSel.innerHTML = `<option value="b_raw">Raw Graduation</option><option value="b_soundpost">Soundpost Plate Phase</option>`; } else { if (currentPlate === 'front') stepSel.innerHTML = `<option value="f_raw">Plate Graduation</option><option value="f_holes">F-Holes Cut</option><option value="f_barred">Bass Bar Phase</option>`; else stepSel.innerHTML = `<option value="back">Final Back Graduation</option>`; } calculate(); }
-        function updateDensityRange() { const sel = document.getElementById('woodSpecies'); document.getElementById('densityRange').innerText = "Range: " + sel.options[sel.selectedIndex].dataset.range; }
-        function setPlate(type) { currentPlate = type; const btnF = document.getElementById('btnFront'); const btnB = document.getElementById('btnBack'); if(type === 'front') { btnF.className = "py-3 text-[10px] font-bold uppercase tracking-widest bg-stone-900 text-white transition"; btnB.className = "py-3 text-[10px] font-bold uppercase tracking-widest bg-white text-stone-400 hover:text-stone-900 transition"; } else { btnB.className = "py-3 text-[10px] font-bold uppercase tracking-widest bg-stone-900 text-white transition"; btnF.className = "py-3 text-[10px] font-bold uppercase tracking-widest bg-white text-stone-400 hover:text-stone-900 transition"; } initProjectUI(); }
-        function calculate() { const inst = document.getElementById('instrument').value; const step = document.getElementById('step').value; const arch = document.getElementById('arching').value; const dens = parseFloat(document.getElementById('density').value) || 0.37; const speedInput = parseFloat(document.getElementById('speed').value); const woodMod = parseFloat(document.getElementById('woodSpecies').value) || 1.0; let ref; if (library[inst][step]) ref = library[inst][step]; else if (currentPlate === 'back' && library[inst].back) ref = library[inst].back; else return; currentRefMode = ref.mode; const refC = library[inst].c || 5000; let tM = ref.m * (dens / ref.d); let tF = ref.f * Math.sqrt(ref.d / dens); if (speedInput > 0) tF = tF * (speedInput / refC); if (['violin', 'viola', 'cello', 'bass_violin'].includes(inst) && arch === 'high') { tM *= 0.94; tF *= 1.02; } const tThick = (ref.t * (ref.d / dens)) * (1 / Math.sqrt(woodMod)); document.getElementById('targetMass').innerText = Math.round(tM); document.getElementById('targetFreq').innerText = Math.round(tF); document.getElementById('predictedThickness').innerText = tThick.toFixed(1); document.getElementById('targetModeLabel').innerText = `Target Freq (${ref.mode})`; diagnose(); }
-        function getDoctorAdvice(eff, inst, step) { let advice = {diag: "", comp: ""}; const isGuitar = inst.includes('hauser') || inst.includes('om') || inst.includes('parlour'); const isViol = inst.includes('viol_'); if (eff >= 97 && eff <= 103) { advice.diag = "SYSTEM RATIONALIZED."; advice.comp = "Efficiency is optimal. Proceed to next phase."; } else if (eff < 97) { advice.diag = "SYSTEM DAMPED (Inefficient)."; if (isGuitar) advice.comp = "Too heavy. Reduce thickness at the **Lower Bout perimeter**."; else if (isViol) advice.comp = "Too heavy. Thin the **'Wings'** (upper and lower bouts) aggressively."; else advice.comp = "Too heavy. Thin the **'Lungs'** (recurve area)."; } else { advice.diag = "SYSTEM OVER-STIFF (Brittle)."; if (isGuitar) advice.comp = "Too stiff. Reduce **Center Seam** thickness."; else if (isViol) advice.comp = "Too rigid. Reduce thickness across the center section."; else advice.comp = "Too stiff. Reduce **Central Spine** thickness."; } if (step === 'b_soundpost' && isViol) { const width = inst.includes('jaye') ? "9cm" : "7cm"; advice.comp += `<br><br><b>Soundpost Plate:</b> Glue a spruce veneer approx ${width} wide across the soundpost line.`; } if (step.includes('braced') && isGuitar) advice.comp += "<br><br><b>Bracing Phase:</b> Scallop the brace ends to release the perimeter."; return advice; }
-        function diagnose() { const cM = parseFloat(document.getElementById('currMass').value); const cF = parseFloat(document.getElementById('currFreq').value); const tM = parseFloat(document.getElementById('targetMass').innerText); const tF = parseFloat(document.getElementById('targetFreq').innerText); if (!cM || !cF) { document.getElementById('efficiencyTag').innerText = "--%"; return; } const eff = Math.round(((cF / cM) / (tF / tM)) * 100); document.getElementById('efficiencyTag').innerText = eff + "%"; const advice = getDoctorAdvice(eff, document.getElementById('instrument').value, document.getElementById('step').value); document.getElementById('diagnosisBox').innerText = advice.diag; document.getElementById('compAdvice').innerHTML = advice.comp; }
-        function saveToLog() { const log = { step: document.getElementById('step').value, mass: document.getElementById('currMass').value, freq: document.getElementById('currFreq').value, eff: document.getElementById('efficiencyTag').innerText }; if(!log.mass || !log.freq) return; history.unshift(log); updateHistoryUI(); }
-        function updateHistoryUI() { document.getElementById('historyBody').innerHTML = history.map(h => `<tr class="group hover:bg-stone-50 transition"><td class="py-3 font-bold text-stone-400 text-[10px] uppercase tracking-wider">${h.step.replace(/^[fb]_/, '')}</td><td class="py-3 text-stone-900">${h.mass}g</td><td class="py-3 text-stone-900">${h.freq}Hz</td><td class="py-3 text-amber-600 font-bold">${h.eff}</td></tr>`).join(''); }
-        function exportHistory() { let csv = "Step,Mass(g),Freq(Hz),Efficiency\n"; history.forEach(h => { csv += `${h.step},${h.mass},${h.freq},${h.eff}\n`; }); const blob = new Blob([csv], { type: 'text/csv' }); const url = window.URL.createObjectURL(blob); const a = document.createElement('a'); a.setAttribute('hidden', ''); a.setAttribute('href', url); a.setAttribute('download', 'luthier_workshop_log.csv'); document.body.appendChild(a); a.click(); document.body.removeChild(a); }
+        <!-- 2D State Map -->
+        <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);padding:.8rem">
+          <div class="mono" style="font-size:.52rem;color:rgba(255,255,255,.28);letter-spacing:.1em;margin-bottom:.55rem">PLATE STATE MAP</div>
+          <div style="position:relative;height:82px">
+            <div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(255,255,255,.08)"></div>
+            <div style="position:absolute;top:50%;left:0;right:0;height:1px;background:rgba(255,255,255,.08)"></div>
+            <span class="mono" style="position:absolute;left:3px;top:2px;font-size:.44rem;color:rgba(255,255,255,.2)">HEAVY·STIFF</span>
+            <span class="mono" style="position:absolute;right:3px;top:2px;font-size:.44rem;color:rgba(255,255,255,.2);text-align:right">LIGHT·STIFF</span>
+            <span class="mono" style="position:absolute;left:3px;bottom:2px;font-size:.44rem;color:rgba(255,255,255,.2)">HEAVY·FLEX</span>
+            <span class="mono" style="position:absolute;right:3px;bottom:2px;font-size:.44rem;color:rgba(255,255,255,.2);text-align:right">LIGHT·FLEX</span>
+            <div style="position:absolute;width:14px;height:14px;border:1px solid rgba(255,255,255,.22);left:50%;top:50%;transform:translate(-50%,-50%)"></div>
+            <div id="stateDot" style="position:absolute;width:9px;height:9px;border-radius:50%;background:var(--amb);left:50%;top:50%;transform:translate(-50%,-50%);transition:left .5s ease,top .5s ease;box-shadow:0 0 5px var(--amb)"></div>
+          </div>
+        </div>
 
-        // --- FIXED SVG GENERATOR (v4.5) ---
-        function openModal() {
-            const modal = document.getElementById('patternModal'); const modeName = document.getElementById('modalModeName'); const svgContainer = document.getElementById('modalSvg'); const holdText = document.getElementById('modalHoldText'); const tapText = document.getElementById('modalTapText');
-            const inst = document.getElementById('instrument').value; const step = document.getElementById('step').value;
-            document.getElementById('modalInstType').innerText = inst.replace(/_/g, " ").toUpperCase(); document.getElementById('modalStageType').innerText = step.replace(/^[fb]_/, '').toUpperCase();
-            const isGuitar = inst.includes('hauser') || inst.includes('om') || inst.includes('parlour'); const isViol = inst.includes('viol_'); const isViolinFam = !isGuitar && !isViol;
-            modal.style.display = "block";
+        <div id="mfDet" class="mono" style="font-size:.68rem;line-height:1.9;display:none"></div>
 
-            // 1. COMPLEX PATHS (Manual "Move" and "Curve" logic to match reality)
-            // Violin: Proper Corners, recurve.
-            const pViolin = "M 75,20 C 100,20 120,35 125,60 C 128,75 126,85 125,90 L 115,95 C 110,97 108,105 108,115 C 108,125 110,133 115,135 L 125,140 C 126,145 130,145 140,165 C 145,180 148,200 148,210 C 148,245 115,265 75,265 C 35,265 2,245 2,210 C 2,200 5,180 10,165 C 20,145 24,145 25,140 L 35,135 C 40,133 42,125 42,115 C 42,105 40,97 35,95 L 25,90 C 24,85 22,75 25,60 C 30,35 50,20 75,20 Z";
-            
-            // Viol: Sloping shoulders (bottle shape), wider C-bouts.
-            const pViol = "M 75,10 L 85,10 C 105,25 120,70 120,95 C 120,105 105,115 105,115 C 105,115 100,125 100,145 C 100,165 105,175 105,175 C 105,175 125,185 125,215 C 125,250 100,265 75,265 C 50,265 25,250 25,215 C 25,185 45,175 45,175 C 45,175 50,165 50,145 C 50,125 45,115 45,115 C 45,115 30,105 30,95 C 30,70 45,25 65,10 L 75,10 Z";
+        <button onclick="saveToLog()" style="padding:.6rem;border:1px solid rgba(255,255,255,.18);background:transparent;color:rgba(255,255,255,.52);font-family:'IBM Plex Mono',monospace;font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:background .2s" onmouseover="this.style.background='rgba(255,255,255,.07)'" onmouseout="this.style.background='transparent'">↓ Log Measurement</button>
+      </div>
 
-            // Guitar: Smooth waist, figure 8.
-            const pGuitar = "M 75,20 C 100,20 130,40 130,80 C 130,110 110,130 110,140 C 110,150 135,160 135,200 C 135,240 100,260 75,260 C 50,260 15,240 15,200 C 15,160 40,150 40,140 C 40,130 20,110 20,80 C 20,40 50,20 75,20 Z";
+      <div style="display:flex;flex-direction:column;gap:1.1rem">
+        <div class="ab">
+          <div class="mono" style="font-size:.54rem;color:var(--amb);letter-spacing:.12em;margin-bottom:.3rem">STATUS</div>
+          <p id="diagBox" style="font-size:.92rem;font-style:italic;color:var(--par);line-height:1.5">Waiting for input…</p>
+        </div>
+        <div class="ab">
+          <div class="mono" style="font-size:.54rem;color:var(--amb);letter-spacing:.12em;margin-bottom:.3rem">PRESCRIPTION</div>
+          <p id="advBox" style="font-size:.78rem;color:rgba(255,255,255,.58);line-height:1.68">Enter measurements to begin analysis.</p>
+        </div>
+      </div>
 
-            let pathData = isGuitar ? pGuitar : (isViol ? pViol : pViolin);
-            let svg = `<svg viewBox="0 0 150 280" class="w-full h-full">`;
-            svg += `<path d="${pathData}" fill="none" stroke="#44403c" stroke-width="1.2"/>`;
+    </div>
+  </div>
 
-            // 2. Features
-            if(isGuitar) {
-                if((step.includes('holes') || step.includes('braced')) && currentPlate === 'front') svg += `<circle cx="75" cy="100" r="16" fill="none" stroke="#a8a29e" stroke-width="1"/>`;
-                if(step.includes('braced')) {
-                    if(inst.includes('hauser')) svg += `<line x1="75" y1="130" x2="75" y2="220" stroke="#d6d3d1"/><line x1="65" y1="130" x2="45" y2="210" stroke="#d6d3d1"/><line x1="85" y1="130" x2="105" y2="210" stroke="#d6d3d1"/>`; 
-                    else svg += `<line x1="35" y1="60" x2="115" y2="200" stroke="#d6d3d1"/><line x1="115" y1="60" x2="35" y2="200" stroke="#d6d3d1"/>`; 
-                }
-            } else if (isViolinFam) {
-                if(step.includes('holes') || step.includes('barred')) svg += `<path d="M 58,115 Q 52,125 52,135 Q 52,145 48,150" fill="none" stroke="#44403c" stroke-width="1.5"/><path d="M 92,115 Q 98,125 98,135 Q 98,145 102,150" fill="none" stroke="#44403c" stroke-width="1.5"/>`;
-                if(step.includes('barred')) svg += `<line x1="55" y1="80" x2="55" y2="180" stroke="#d6d3d1" stroke-width="2.5" opacity="0.5" stroke-linecap="round"/>`;
-            } else if (isViol) {
-                 if(step.includes('holes') || step.includes('barred')) svg += `<path d="M 55,125 Q 65,145 55,165" fill="none" stroke="#44403c" stroke-width="1.5"/><path d="M 95,125 Q 85,145 95,165" fill="none" stroke="#44403c" stroke-width="1.5"/>`;
-                if(step.includes('soundpost')) svg += `<rect x="50" y="135" width="50" height="15" fill="#e7e5e4" stroke="#d6d3d1" opacity="0.5"/>`;
-            }
+  <!-- LOG -->
+  <div>
+    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--stn);padding-bottom:.55rem;margin-bottom:.85rem">
+      <h3 style="font-size:.82rem;text-transform:uppercase;letter-spacing:.04em">Workbench Log</h3>
+      <button onclick="exportCSV()" class="mono" style="font-size:.54rem;color:var(--mut);letter-spacing:.1em;text-transform:uppercase;background:none;border:none;cursor:pointer">↓ CSV</button>
+    </div>
+    <table id="lt">
+      <thead><tr><th>Stage</th><th>Plate</th><th>Mass</th><th>Freq</th><th>Eff.</th><th>State</th></tr></thead>
+      <tbody id="logBody"><tr><td colspan="6" style="color:var(--mut);font-style:italic;padding:.7rem 0">No entries yet.</td></tr></tbody>
+    </table>
+  </div>
 
-            // 3. Modes (Textured Sand) & Dots (Restored)
-            let nodes = "", holdX, holdY, tapX, tapY;
-            if (currentRefMode === 'M5') { 
-                modeName.innerText = "M5 - The Ring Mode"; holdText.innerText = "Hold on the Node line (approx 20% down)."; tapText.innerText = "Tap dead center (The Bullseye).";
-                // Textured Sand Ring
-                nodes = `<path d="M 35,60 Q 75,90 115,60" stroke="#6b7280" stroke-width="5" stroke-dasharray="1,2" stroke-linecap="round" fill="none" opacity="0.6"/><path d="M 25,200 Q 60,180 75,200 Q 90,220 125,200" stroke="#6b7280" stroke-width="5" stroke-dasharray="1,2" stroke-linecap="round" fill="none" opacity="0.6"/>`;
-                // Dots
-                holdX = 75; holdY = 105; tapX = 75; tapY = 150;
-                svg += `<circle cx="20" cy="85" r="4" fill="#3b82f6" stroke="white"/><circle cx="130" cy="85" r="4" fill="#3b82f6" stroke="white"/><circle cx="20" cy="180" r="4" fill="#3b82f6" stroke="white"/><circle cx="130" cy="180" r="4" fill="#3b82f6" stroke="white"/>`; // 4 hold points for M5
-            } 
-            else if (currentRefMode === 'M2') { 
-                modeName.innerText = "M2 - The X-Mode"; holdText.innerText = "Hold at the edge of the upper bout."; tapText.innerText = "Tap between the legs of the X.";
-                nodes = `<line x1="30" y1="40" x2="120" y2="240" stroke="#6b7280" stroke-width="5" stroke-dasharray="1,2" stroke-linecap="round" opacity="0.6"/><line x1="120" y1="40" x2="30" y2="240" stroke="#6b7280" stroke-width="5" stroke-dasharray="1,2" stroke-linecap="round" opacity="0.6"/>`;
-                tapX = 75; tapY = 220;
-                svg += `<circle cx="35" cy="40" r="4" fill="#3b82f6" stroke="white"/>`;
-            } else if (currentRefMode === 'M4') { 
-                modeName.innerText = "M4 - The Cross Mode"; holdText.innerText = "Hold on the side edge (Node)."; tapText.innerText = "Tap near bridge area, offset from center.";
-                nodes = `<path d="M 15,150 Q 75,150 135,150" stroke="#6b7280" stroke-width="5" stroke-dasharray="1,2" stroke-linecap="round" opacity="0.6"/>`;
-                tapX = 95; tapY = 170;
-                svg += `<circle cx="15" cy="150" r="4" fill="#3b82f6" stroke="white"/>`;
-            }
+</main>
 
-            svg += nodes;
-            // Tap Target
-            svg += `<circle cx="${tapX}" cy="${tapY}" r="6" fill="#ef4444" stroke="white" stroke-width="2"/>`; 
-            svg += `<line x1="${tapX-10}" y1="${tapY}" x2="${tapX+10}" y2="${tapY}" stroke="#ef4444" stroke-width="1" opacity="0.5"/>`; 
-            svg += `<line x1="${tapX}" y1="${tapY-10}" x2="${tapX}" y2="${tapY+10}" stroke="#ef4444" stroke-width="1" opacity="0.5"/>`;
-            svg += `</svg>`;
-            svgContainer.innerHTML = svg;
-        }
-        function closeModal() { document.getElementById('patternModal').style.display = "none"; }
-        window.onclick = function(event) { if (event.target == document.getElementById('patternModal')) closeModal(); }
-        initProjectUI();
-    </script>
+<!-- MODAL -->
+<div id="mo" onclick="handleMoClick(event)">
+  <div id="mb">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.95rem">
+      <div>
+        <h3 style="font-size:.92rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em">Plate Analysis</h3>
+        <p class="mono" id="moSub" style="font-size:.54rem;color:var(--amb);letter-spacing:.15em;margin-top:.22rem"></p>
+      </div>
+      <button onclick="closeModal()" style="background:none;border:none;cursor:pointer;font-size:1.4rem;color:var(--mut);line-height:1;padding:0 .2rem">&times;</button>
+    </div>
+    <div class="mtb">
+      <button class="mt on" id="tmMode" onclick="setMTab('mode')">Mode Pattern</button>
+      <button class="mt" id="tmZones" onclick="setMTab('zones')">Thinning Zones</button>
+    </div>
+
+    <!-- Mode tab -->
+    <div id="tcMode">
+      <div id="modeSvgBox" style="background:var(--par);border:1px solid var(--stn);height:390px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:.95rem"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem;background:var(--par);padding:.8rem;border:1px solid var(--stn);margin-bottom:.8rem">
+        <div style="display:flex;gap:.4rem;align-items:flex-start">
+          <div style="width:9px;height:9px;border-radius:50%;background:#3b82f6;flex-shrink:0;margin-top:3px"></div>
+          <div>
+            <div class="mono" style="font-size:.56rem;font-weight:500;text-transform:uppercase;letter-spacing:.08em">Hold — Node</div>
+            <p id="holdTxt" style="font-size:.74rem;color:var(--mut);margin-top:.14rem;line-height:1.45"></p>
+          </div>
+        </div>
+        <div style="display:flex;gap:.4rem;align-items:flex-start">
+          <div style="width:9px;height:9px;border-radius:50%;background:#ef4444;flex-shrink:0;margin-top:3px"></div>
+          <div>
+            <div class="mono" style="font-size:.56rem;font-weight:500;text-transform:uppercase;letter-spacing:.08em">Tap — Anti-Node</div>
+            <p id="tapTxt" style="font-size:.74rem;color:var(--mut);margin-top:.14rem;line-height:1.45"></p>
+          </div>
+        </div>
+      </div>
+      <div style="padding:.6rem .8rem;background:rgba(184,120,16,.08);border-left:2px solid var(--amb)">
+        <p class="mono" style="font-size:.58rem;color:var(--mah);line-height:1.65"><strong>Technique:</strong> Fingertip hold at blue points — the plate must be completely free. One sharp knock with a fingernail or knuckle at the red target. Use a spectrum analyser app (e.g. Spectroid) to read the dominant peak. Repeat until you get a consistent reading.</p>
+      </div>
+    </div>
+
+    <!-- Zones tab -->
+    <div id="tcZones" style="display:none">
+      <div id="zonesSvgBox" style="background:var(--par);border:1px solid var(--stn);height:390px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:.95rem"></div>
+      <div id="zonesLeg" style="display:grid;grid-template-columns:1fr 1fr;gap:.45rem"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────────────────
+let cPlate = 'front', cMode = 'M5', wLog = [];
+
+// ── DATA ───────────────────────────────────────────────────────────────────
+const WOODS = {
+  front:[
+    {name:"European Spruce",  mod:1.00, range:"0.36–0.44"},
+    {name:"Sitka Spruce",     mod:1.08, range:"0.39–0.48"},
+    {name:"Cedrela (Sp. Cedar)", mod:0.85, range:"0.33–0.39"},
+  ],
+  back:[
+    {name:"European Maple",   mod:1.00, range:"0.58–0.66"},
+    {name:"Walnut",           mod:0.95, range:"0.55–0.65"},
+    {name:"Pearwood",         mod:0.92, range:"0.68–0.74"},
+    {name:"Cherry",           mod:0.94, range:"0.55–0.62"},
+    {name:"London Plane",     mod:0.90, range:"0.58–0.64"},
+    {name:"Mahogany",         mod:0.88, range:"0.48–0.58"},
+    {name:"Indian Rosewood",  mod:1.15, range:"0.75–0.85"},
+  ]
+};
+
+const LIB = {
+  violin:{c:5200,f_raw:{m:62,f:305,d:.37,t:2.8,mode:'M5'},f_holes:{m:60,f:288,d:.37,t:2.8,mode:'M5'},f_barred:{m:65,f:340,d:.37,t:2.8,mode:'M5'},back:{m:105,f:360,d:.59,c:4200,t:4.2,mode:'M5'}},
+  viola:{c:5200,f_raw:{m:95,f:265,d:.38,t:3.1,mode:'M5'},f_holes:{m:92,f:250,d:.38,t:3.1,mode:'M5'},f_barred:{m:102,f:305,d:.38,t:3.1,mode:'M5'},back:{m:160,f:325,d:.59,c:4200,t:4.8,mode:'M5'}},
+  cello:{c:5100,f_raw:{m:370,f:142,d:.36,t:5.2,mode:'M5'},f_holes:{m:362,f:135,d:.36,t:5.2,mode:'M5'},f_barred:{m:410,f:168,d:.36,t:5.2,mode:'M5'},back:{m:650,f:185,d:.61,c:4000,t:8.0,mode:'M5'}},
+  bass_violin:{c:5000,f_raw:{m:430,f:125,d:.35,t:6.5,mode:'M5'},f_holes:{m:420,f:116,d:.35,t:6.5,mode:'M5'},f_barred:{m:465,f:155,d:.35,t:6.5,mode:'M5'},back:{m:860,f:180,d:.61,c:4100,t:9.5,mode:'M5'}},
+  viol_jaye:{c:5300,f_raw:{m:142,f:112,d:.36,t:2.3,mode:'M5'},f_holes:{m:139,f:104,d:.36,t:2.3,mode:'M5'},f_barred:{m:155,f:130,d:.36,t:2.3,mode:'M5'},b_raw:{m:220,f:124,d:.62,c:4200,t:3.0,mode:'M5'},b_soundpost:{m:235,f:140,d:.62,c:4200,t:3.0,mode:'M5'}},
+  viol_colichon:{c:5300,f_raw:{m:205,f:85,d:.36,t:3.0,mode:'M5'},f_holes:{m:200,f:78,d:.36,t:3.0,mode:'M5'},f_barred:{m:225,f:105,d:.36,t:3.0,mode:'M5'},b_raw:{m:320,f:98,d:.62,c:4200,t:3.5,mode:'M5'},b_soundpost:{m:335,f:115,d:.62,c:4200,t:3.5,mode:'M5'}},
+  classical_hauser:{c:5500,f_raw:{m:130,f:95,d:.40,t:2.4,mode:'M2'},f_holes:{m:126,f:90,d:.40,t:2.4,mode:'M2'},f_braced:{m:175,f:185,d:.40,t:2.4,mode:'M4'},b_raw:{m:210,f:120,d:.82,c:4400,t:2.1,mode:'M2'},b_braced:{m:245,f:220,d:.82,c:4400,t:2.1,mode:'M5'}},
+  steel_string_om:{c:5500,f_raw:{m:145,f:102,d:.43,t:2.6,mode:'M2'},f_holes:{m:141,f:96,d:.43,t:2.6,mode:'M2'},f_braced:{m:210,f:205,d:.43,t:2.6,mode:'M4'},b_raw:{m:240,f:125,d:.85,c:4400,t:2.3,mode:'M2'},b_braced:{m:285,f:240,d:.85,c:4400,t:2.3,mode:'M5'}},
+  steel_string_parlour:{c:5500,f_raw:{m:118,f:110,d:.40,t:2.4,mode:'M2'},f_holes:{m:114,f:104,d:.40,t:2.4,mode:'M2'},f_braced:{m:160,f:215,d:.40,t:2.4,mode:'M4'},b_raw:{m:175,f:130,d:.60,c:4200,t:2.4,mode:'M2'},b_braced:{m:205,f:260,d:.60,c:4200,t:2.4,mode:'M5'}}
+};
+
+// ── PLATE SVG PATHS  (viewBox 0 0 200 340) ─────────────────────────────────
+// All three templates share the coordinate space; clip-path handles appearance.
+const PP = {
+  // Violin family — proper C-bout corners, recurve suggestion at waist
+  violin:`M100,24 C122,24 155,41 161,67 C167,85 163,97 151,103 L143,106 C137,110 135,119 135,130 C135,141 139,148 147,152 L155,156 C166,163 198,180 198,216 C198,258 173,294 147,312 C127,323 115,327 100,327 C85,327 73,323 53,312 C27,294 2,258 2,216 C2,180 34,163 45,156 L53,152 C61,148 65,141 65,130 C65,119 63,110 57,106 L49,103 C37,97 33,85 39,67 C45,41 78,24 100,24Z`,
+  // Viol — flat/sloped shoulders, wider C-bouts
+  viol:`M80,18 L120,18 C144,22 164,58 166,90 C168,108 158,120 150,126 L142,130 C136,134 134,144 134,158 C134,172 138,182 146,188 L154,193 C168,203 192,226 192,272 C192,314 162,332 100,332 C38,332 8,314 8,272 C8,226 32,203 46,193 L54,188 C62,182 66,172 66,158 C66,144 64,134 58,130 L50,126 C42,120 32,108 34,90 C36,58 56,22 80,18Z`,
+  // Guitar — figure-8 waist
+  guitar:`M100,22 C126,22 148,42 148,78 C148,104 134,120 122,130 C114,137 112,146 112,158 C112,170 126,184 142,204 C162,228 170,255 170,282 C170,316 142,338 100,338 C58,338 30,316 30,282 C30,255 38,228 58,204 C74,184 88,170 88,158 C88,146 86,137 78,130 C66,120 52,104 52,78 C52,42 74,22 100,22Z`
+};
+
+function plateKey(inst){
+  if(inst.includes('viol_')) return 'viol';
+  if(inst.includes('hauser')||inst.includes('om')||inst.includes('parlour')) return 'guitar';
+  return 'violin';
+}
+
+// ── FEATURES OVERLAY  (f-holes, braces, etc.) ──────────────────────────────
+function feats(inst, step){
+  const isG = plateKey(inst)==='guitar';
+  const isV = plateKey(inst)==='viol';
+  if(cPlate==='back'){
+    if(step==='b_soundpost' && isV){
+      const w = inst.includes('jaye') ? 52 : 44;
+      return `<rect x="${100-w/2}" y="162" width="${w}" height="20" rx="2" fill="rgba(215,180,110,.55)" stroke="rgba(100,58,16,.4)" stroke-width="1"/>`;
+    }
+    return '';
+  }
+  let f='';
+  if(isG){
+    if(step!=='f_raw') f+=`<circle cx="100" cy="108" r="22" fill="#2a1208" opacity=".76"/>
+      <circle cx="100" cy="108" r="20.5" fill="none" stroke="rgba(238,210,165,.45)" stroke-width="1"/>`;
+    if(step==='f_braced'){
+      if(inst.includes('hauser')) f+=`
+        <line x1="100" y1="142" x2="100" y2="308" stroke="rgba(120,70,20,.4)" stroke-width="3" stroke-linecap="round"/>
+        <line x1="100" y1="155" x2="62" y2="304" stroke="rgba(120,70,20,.32)" stroke-width="2" stroke-linecap="round"/>
+        <line x1="100" y1="155" x2="138" y2="304" stroke="rgba(120,70,20,.32)" stroke-width="2" stroke-linecap="round"/>
+        <line x1="100" y1="166" x2="44" y2="304" stroke="rgba(120,70,20,.22)" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="100" y1="166" x2="156" y2="304" stroke="rgba(120,70,20,.22)" stroke-width="1.5" stroke-linecap="round"/>`;
+      else f+=`
+        <line x1="52" y1="130" x2="152" y2="292" stroke="rgba(120,70,20,.42)" stroke-width="3" stroke-linecap="round"/>
+        <line x1="148" y1="130" x2="48" y2="292" stroke="rgba(120,70,20,.42)" stroke-width="3" stroke-linecap="round"/>`;
+    }
+  } else if(isV){
+    if(step!=='f_raw') f+=`
+      <path d="M60,146 Q48,164 48,182 Q48,200 60,216" fill="none" stroke="#2a1208" stroke-width="5" opacity=".72" stroke-linecap="round"/>
+      <path d="M140,146 Q152,164 152,182 Q152,200 140,216" fill="none" stroke="#2a1208" stroke-width="5" opacity=".72" stroke-linecap="round"/>`;
+    if(step==='f_barred') f+=`<line x1="63" y1="96" x2="63" y2="264" stroke="rgba(120,70,20,.42)" stroke-width="3.5" stroke-linecap="round"/>`;
+  } else {
+    // violin family f-holes
+    if(step!=='f_raw') f+=`
+      <circle cx="66" cy="133" r="4.5" fill="#2a1208" opacity=".78"/>
+      <path d="M66,137 C60,148 59,156 61,166 C63,172 69,173 71,180 C73,186 67,194 63,202 C59,208 59,214 66,218" fill="none" stroke="#2a1208" stroke-width="4" opacity=".78" stroke-linecap="round"/>
+      <circle cx="66" cy="218" r="6" fill="#2a1208" opacity=".78"/>
+      <line x1="55" y1="166" x2="61" y2="166" stroke="#2a1208" stroke-width="2.5" opacity=".78"/>
+      <line x1="61" y1="180" x2="55" y2="180" stroke="#2a1208" stroke-width="2.5" opacity=".78"/>
+      <circle cx="134" cy="133" r="4.5" fill="#2a1208" opacity=".78"/>
+      <path d="M134,137 C140,148 141,156 139,166 C137,172 131,173 129,180 C127,186 133,194 137,202 C141,208 141,214 134,218" fill="none" stroke="#2a1208" stroke-width="4" opacity=".78" stroke-linecap="round"/>
+      <circle cx="134" cy="218" r="6" fill="#2a1208" opacity=".78"/>
+      <line x1="145" y1="166" x2="139" y2="166" stroke="#2a1208" stroke-width="2.5" opacity=".78"/>
+      <line x1="139" y1="180" x2="145" y2="180" stroke="#2a1208" stroke-width="2.5" opacity=".78"/>`;
+    if(step==='f_barred') f+=`<line x1="69" y1="96" x2="69" y2="274" stroke="rgba(120,70,20,.42)" stroke-width="4" stroke-linecap="round"/>`;
+  }
+  return f;
+}
+
+// ── MODE PATTERN SVG ───────────────────────────────────────────────────────
+function buildModeSVG(inst, step, mode){
+  const pk = plateKey(inst);
+  const path = PP[pk];
+  const isG = pk==='guitar';
+  const isV = pk==='viol';
+
+  const grain = `<pattern id="wg" x="0" y="0" width="4" height="36" patternUnits="userSpaceOnUse">
+    <line x1="2" y1="0" x2="2" y2="36" stroke="rgba(100,55,18,.07)" stroke-width="1.5"/>
+  </pattern>`;
+
+  let shade='', nodes='', markers='', holdTxt='', tapTxt='', mLabel='';
+
+  // ─── M5 : Ring / Breathing mode ────
+  if(mode==='M5'){
+    mLabel='M5 — Ring / Breathing Mode';
+    const cy0 = isG?195:isV?200:188;
+    const iry = isG?72:isV?90:92, irx = isG?42:isV?52:50;
+    const nry = iry+15, nrx = irx+13;
+
+    shade=`<rect class="phA" x="0" y="0" width="200" height="340" fill="rgba(200,85,18,.28)"/>
+      <ellipse class="phB" cx="100" cy="${cy0}" rx="${irx}" ry="${iry}" fill="rgba(38,102,215,.30)"/>`;
+    nodes=`<ellipse cx="100" cy="${cy0}" rx="${nrx}" ry="${nry}" fill="none" stroke="rgba(28,14,4,.5)" stroke-width="2" stroke-dasharray="5,4"/>`;
+
+    const tapX=100, tapY=cy0;
+    if(isV){
+      markers=`<circle cx="8" cy="162" r="7.5" fill="#3b82f6" stroke="white" stroke-width="1.8"/>
+               <circle cx="192" cy="162" r="7.5" fill="#3b82f6" stroke="white" stroke-width="1.8"/>`;
+      holdTxt='Hold at both C-bout side edges. These points sit on the nodal ring between the two antinode zones.';
+    } else if(isG){
+      markers=`<circle cx="30" cy="157" r="7.5" fill="#3b82f6" stroke="white" stroke-width="1.8"/>
+               <circle cx="170" cy="157" r="7.5" fill="#3b82f6" stroke="white" stroke-width="1.8"/>`;
+      holdTxt='Hold at both waist edges — they sit on the nodal ring of the M5 mode.';
+    } else {
+      markers=`<circle cx="38" cy="108" r="7.5" fill="#3b82f6" stroke="white" stroke-width="1.8"/>
+               <circle cx="162" cy="108" r="7.5" fill="#3b82f6" stroke="white" stroke-width="1.8"/>
+               <circle cx="38" cy="258" r="7.5" fill="#3b82f6" stroke="white" stroke-width="1.8"/>
+               <circle cx="162" cy="258" r="7.5" fill="#3b82f6" stroke="white" stroke-width="1.8"/>`;
+      holdTxt='Hold at any of the four corner positions — all lie on the nodal ring between the warm edge and cool centre antinodes.';
+    }
+    markers+=`<circle class="tapRing" cx="${tapX}" cy="${tapY}" r="12" fill="rgba(239,68,68,.2)" stroke="#ef4444" stroke-width="1.5"/>
+      <circle cx="${tapX}" cy="${tapY}" r="4.5" fill="#ef4444"/>
+      <line x1="${tapX-17}" y1="${tapY}" x2="${tapX+17}" y2="${tapY}" stroke="#ef4444" stroke-width="1.2" opacity=".48"/>
+      <line x1="${tapX}" y1="${tapY-17}" x2="${tapX}" y2="${tapY+17}" stroke="#ef4444" stroke-width="1.2" opacity=".48"/>`;
+    tapTxt='Tap dead centre — the geometric bullseye of the central antinode.';
+
+  // ─── M2 : X / Two-lobe mode ────
+  } else if(mode==='M2'){
+    mLabel='M2 — Two-Lobe / X Mode';
+    const cx0=100, cy1=170;
+    const ax=isG?52:40, ay=isG?72:52;
+    const bx=isG?148:160, by=isG?72:52;
+    const cx_=isG?148:160, cy_=isG?298:298;
+    const dx=isG?52:40, dy=isG?298:298;
+
+    shade=`<polygon class="phA" fill="rgba(200,85,18,.26)" points="${cx0},${cy1} ${ax},${ay} 100,22 ${bx},${by}"/>
+      <polygon class="phA" fill="rgba(200,85,18,.26)" points="${cx0},${cy1} ${dx},${dy} 100,338 ${cx_},${cy_}"/>
+      <polygon class="phB" fill="rgba(38,102,215,.26)" points="${cx0},${cy1} ${bx},${by} 198,175 ${cx_},${cy_}"/>
+      <polygon class="phB" fill="rgba(38,102,215,.26)" points="${cx0},${cy1} ${ax},${ay} 2,175 ${dx},${dy}"/>`;
+    nodes=`<line x1="${ax}" y1="${ay}" x2="${cx_}" y2="${cy_}" stroke="rgba(28,14,4,.52)" stroke-width="2" stroke-dasharray="5,4"/>
+      <line x1="${bx}" y1="${by}" x2="${dx}" y2="${dy}" stroke="rgba(28,14,4,.52)" stroke-width="2" stroke-dasharray="5,4"/>`;
+
+    const tapX=isG?65:62, tapY=isG?258:252;
+    markers=`<circle cx="${ax}" cy="${ay}" r="7.5" fill="#3b82f6" stroke="white" stroke-width="1.8"/>
+      <circle class="tapRing" cx="${tapX}" cy="${tapY}" r="12" fill="rgba(239,68,68,.2)" stroke="#ef4444" stroke-width="1.5"/>
+      <circle cx="${tapX}" cy="${tapY}" r="4.5" fill="#ef4444"/>
+      <line x1="${tapX-17}" y1="${tapY}" x2="${tapX+17}" y2="${tapY}" stroke="#ef4444" stroke-width="1.2" opacity=".48"/>
+      <line x1="${tapX}" y1="${tapY-17}" x2="${tapX}" y2="${tapY+17}" stroke="#ef4444" stroke-width="1.2" opacity=".48"/>`;
+    holdTxt='Hold at the upper-left corner — one end of the diagonal nodal line where it exits the plate.';
+    tapTxt='Tap into the lower-left lobe (warm zone), well clear of the nodal X.';
+
+  // ─── M4 : Cross / Monopole mode ────
+  } else if(mode==='M4'){
+    mLabel='M4 — Cross Mode';
+    const ny = isG?152:168;
+    shade=`<rect class="phA" x="0" y="0" width="200" height="${ny}" fill="rgba(200,85,18,.26)"/>
+      <rect class="phB" x="0" y="${ny}" width="200" height="${340-ny}" fill="rgba(38,102,215,.26)"/>`;
+    nodes=`<line x1="0" y1="${ny}" x2="200" y2="${ny}" stroke="rgba(28,14,4,.52)" stroke-width="2" stroke-dasharray="5,4"/>`;
+    const tapX=100, tapY=isG?274:256;
+    markers=`<circle cx="30" cy="${ny}" r="7.5" fill="#3b82f6" stroke="white" stroke-width="1.8"/>
+      <circle class="tapRing" cx="${tapX}" cy="${tapY}" r="12" fill="rgba(239,68,68,.2)" stroke="#ef4444" stroke-width="1.5"/>
+      <circle cx="${tapX}" cy="${tapY}" r="4.5" fill="#ef4444"/>
+      <line x1="${tapX-17}" y1="${tapY}" x2="${tapX+17}" y2="${tapY}" stroke="#ef4444" stroke-width="1.2" opacity=".48"/>
+      <line x1="${tapX}" y1="${tapY-17}" x2="${tapX}" y2="${tapY+17}" stroke="#ef4444" stroke-width="1.2" opacity=".48"/>`;
+    holdTxt='Hold at the left side edge at the nodal line level — the waist of the plate.';
+    tapTxt='Tap the centre of the lower bout, well into the blue antinode zone.';
+  }
+
+  const svg=`<svg viewBox="0 0 200 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">
+    <defs>
+      <clipPath id="pc1"><path d="${path}"/></clipPath>
+      ${grain}
+    </defs>
+    <path d="${path}" fill="#e2c888" stroke="none"/>
+    <rect x="0" y="0" width="200" height="340" fill="url(#wg)" clip-path="url(#pc1)"/>
+    <g clip-path="url(#pc1)">${shade}${nodes}</g>
+    <g clip-path="url(#pc1)">${feats(inst,step)}</g>
+    <path d="${path}" fill="none" stroke="#3a1c08" stroke-width="1.8"/>
+    ${markers}
+    <text x="100" y="18" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="7" fill="rgba(58,28,8,.4)" letter-spacing="1">${mLabel.toUpperCase()}</text>
+  </svg>`;
+
+  return {svg, holdTxt, tapTxt};
+}
+
+// ── THINNING ZONE SVG ─────────────────────────────────────────────────────
+function buildZonesSVG(inst){
+  const pk = plateKey(inst);
+  const path = PP[pk];
+  const isG = pk==='guitar', isV = pk==='viol';
+
+  const grain = `<pattern id="wg2" x="0" y="0" width="4" height="36" patternUnits="userSpaceOnUse">
+    <line x1="2" y1="0" x2="2" y2="36" stroke="rgba(100,55,18,.05)" stroke-width="1.5"/>
+  </pattern>`;
+
+  let zones='';
+  let legend=[];
+
+  if(isG){
+    zones=`
+      <ellipse cx="100" cy="268" rx="58" ry="53" fill="rgba(218,74,16,.18)" stroke="rgba(218,74,16,.45)" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <ellipse cx="100" cy="72" rx="40" ry="36" fill="rgba(240,156,16,.16)" stroke="rgba(240,156,16,.4)" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <rect x="91" y="130" width="18" height="150" rx="2" fill="rgba(46,126,215,.14)" stroke="rgba(46,126,215,.38)" stroke-width="1.5" stroke-dasharray="4,3"/>`;
+    legend=[
+      {c:'rgba(218,74,16,.6)',l:'Lower Bout Perimeter',d:'Primary zone — main impact on resonance and mass'},
+      {c:'rgba(240,156,16,.6)',l:'Upper Bout',d:'Secondary — affects upper register response'},
+      {c:'rgba(46,126,215,.6)',l:'Centre Seam',d:'Structural axis — modify only when too stiff'},
+    ];
+  } else if(isV){
+    zones=`
+      <ellipse cx="100" cy="86" rx="50" ry="27" fill="rgba(218,74,16,.18)" stroke="rgba(218,74,16,.45)" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <ellipse cx="100" cy="262" rx="67" ry="50" fill="rgba(218,74,16,.18)" stroke="rgba(218,74,16,.45)" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <rect x="10" y="136" width="28" height="54" rx="3" fill="rgba(240,156,16,.16)" stroke="rgba(240,156,16,.4)" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <rect x="162" y="136" width="28" height="54" rx="3" fill="rgba(240,156,16,.16)" stroke="rgba(240,156,16,.4)" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <rect x="91" y="82" width="18" height="178" rx="2" fill="rgba(46,126,215,.12)" stroke="rgba(46,126,215,.32)" stroke-width="1.5" stroke-dasharray="4,3"/>`;
+    legend=[
+      {c:'rgba(218,74,16,.6)',l:'Wings (Upper & Lower Bouts)',d:'Primary zone — most mass removed here'},
+      {c:'rgba(240,156,16,.6)',l:'C-Bout Flanks',d:'Secondary — affects cross stiffness at waist'},
+      {c:'rgba(46,126,215,.6)',l:'Central Spine',d:'Structural core — remove last and sparingly'},
+    ];
+  } else {
+    // violin family
+    zones=`
+      <ellipse cx="100" cy="76" rx="50" ry="27" fill="rgba(218,74,16,.18)" stroke="rgba(218,74,16,.45)" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <ellipse cx="100" cy="248" rx="69" ry="50" fill="rgba(218,74,16,.18)" stroke="rgba(218,74,16,.45)" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <ellipse cx="42" cy="153" rx="19" ry="26" fill="rgba(240,156,16,.16)" stroke="rgba(240,156,16,.4)" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <ellipse cx="158" cy="153" rx="19" ry="26" fill="rgba(240,156,16,.16)" stroke="rgba(240,156,16,.4)" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <ellipse cx="100" cy="196" rx="31" ry="50" fill="rgba(46,126,215,.12)" stroke="rgba(46,126,215,.32)" stroke-width="1.5" stroke-dasharray="4,3"/>`;
+    legend=[
+      {c:'rgba(218,74,16,.6)',l:'Wings / Recurve Channel',d:'Primary zone — arched slopes, main graduation area'},
+      {c:'rgba(240,156,16,.6)',l:'C-Bout "Lungs"',d:'Secondary — governs cross stiffness and flexibility'},
+      {c:'rgba(46,126,215,.6)',l:'Central Dome',d:'Structural keystone — approach with caution, last to touch'},
+    ];
+  }
+
+  const svg=`<svg viewBox="0 0 200 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">
+    <defs>
+      <clipPath id="pc2"><path d="${path}"/></clipPath>
+      ${grain}
+    </defs>
+    <path d="${path}" fill="#e2c888" stroke="none"/>
+    <rect x="0" y="0" width="200" height="340" fill="url(#wg2)" clip-path="url(#pc2)"/>
+    <g clip-path="url(#pc2)">${zones}</g>
+    <path d="${path}" fill="none" stroke="#3a1c08" stroke-width="1.8"/>
+  </svg>`;
+
+  const legHTML = legend.map(l=>`
+    <div style="display:flex;gap:.4rem;align-items:flex-start;padding:.5rem;background:var(--par);border:1px solid var(--stn)">
+      <div style="width:11px;height:11px;border-radius:2px;background:${l.c};flex-shrink:0;margin-top:2px"></div>
+      <div>
+        <div class="mono" style="font-size:.58rem;font-weight:500">${l.l}</div>
+        <div style="font-size:.7rem;color:var(--mut);margin-top:.08rem;line-height:1.35">${l.d}</div>
+      </div>
+    </div>`).join('');
+
+  return {svg, legHTML};
+}
+
+// ── UTILITIES ─────────────────────────────────────────────────────────────
+function hzToNote(f){
+  if(!f||f<=0) return '';
+  const N=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  const s=Math.round(12*Math.log2(f/440));
+  return `≈${N[((s%12)+12)%12]}${Math.floor((s+9)/12)+4}`;
+}
+
+function gColor(pct){
+  const d=Math.abs(100-pct);
+  return d<=6?'var(--gd)':d<=14?'var(--wn)':'var(--dng)';
+}
+
+function getRef(inst,step){
+  const d=LIB[inst]; if(!d) return null;
+  if(d[step]) return d[step];
+  if(cPlate==='back'&&d.back) return d.back;
+  return null;
+}
+
+// ── CALCULATE ─────────────────────────────────────────────────────────────
+function calc(){
+  const inst=document.getElementById('instrument').value;
+  const step=document.getElementById('step').value;
+  const arch=document.getElementById('arching').value;
+  const dens=parseFloat(document.getElementById('density').value)||0.37;
+  const spd=parseFloat(document.getElementById('speed').value);
+  const woodMod=parseFloat(document.getElementById('woodSpecies').value)||1.0;
+
+  const ref=getRef(inst,step); if(!ref) return;
+  cMode=ref.mode;
+
+  const refC=LIB[inst].c||5000;
+  let tM=ref.m*(dens/ref.d);
+  let tF=ref.f*Math.sqrt(ref.d/dens);
+  if(spd>0) tF*=(spd/refC);
+  if(['violin','viola','cello','bass_violin'].includes(inst)&&arch==='high'){tM*=0.94;tF*=1.02;}
+  const tT=(ref.t*(ref.d/dens))*(1/Math.sqrt(woodMod));
+
+  document.getElementById('targetMass').innerText=Math.round(tM);
+  document.getElementById('targetFreq').innerText=Math.round(tF);
+  document.getElementById('predictedThickness').innerText=tT.toFixed(1);
+  document.getElementById('targetModeLabel').innerText=`Target Freq (${ref.mode})`;
+  document.getElementById('noteLabel').innerText=hzToNote(Math.round(tF));
+
+  let tn='';
+  if(tT<2.0) tn='⚠ Very thin — edge work demands extreme care';
+  else if(tT<2.5) tn='Thin graduation territory';
+  else if(tT>6.0) tn='Heavy stock — substantial work ahead';
+  document.getElementById('thickNote').innerText=tn;
+
+  diagnose();
+}
+
+// ── DIAGNOSE (9-state) ────────────────────────────────────────────────────
+function diagnose(){
+  const cM=parseFloat(document.getElementById('currMass').value);
+  const cF=parseFloat(document.getElementById('currFreq').value);
+  const tM=parseFloat(document.getElementById('targetMass').innerText);
+  const tF=parseFloat(document.getElementById('targetFreq').innerText);
+
+  const dot=document.getElementById('stateDot');
+  if(!cM||!cF||!tM||!tF||isNaN(tM)){
+    document.getElementById('effTag').innerText='--%';
+    dot.style.left='50%'; dot.style.top='50%';
+    return;
+  }
+
+  const mR=cM/tM, fR=cF/tF;
+  const eff=Math.round((fR/mR)*100);
+  document.getElementById('effTag').innerText=eff+'%';
+
+  // Gauges
+  const mPct=mR*100, fPct=fR*100;
+  const mGF=document.getElementById('massGF'), fGF=document.getElementById('freqGF');
+  mGF.style.width=Math.min(mPct,100)+'%'; mGF.style.background=gColor(mPct);
+  fGF.style.width=Math.min(fPct,100)+'%'; fGF.style.background=gColor(fPct);
+  document.getElementById('massGLbl').innerText=cM+'g ('+Math.round(mPct)+'%)';
+  document.getElementById('freqGLbl').innerText=cF+'Hz ('+Math.round(fPct)+'%)';
+
+  // State dot: left = heavy, right = light | top = stiff, bottom = flex
+  dot.style.left=Math.max(5,Math.min(95, 50+(1-mR)*40))+'%';
+  dot.style.top =Math.max(5,Math.min(95, 50+(1-fR)*40))+'%';
+
+  const inst=document.getElementById('instrument').value;
+  const step=document.getElementById('step').value;
+  const isG=plateKey(inst)==='guitar', isV=plateKey(inst)==='viol';
+
+  const mS=mR>1.06?'heavy':mR<0.94?'light':'ok';
+  const fS=fR>1.05?'stiff':fR<0.95?'flex':'ok';
+
+  const advice = {
+    'ok_ok':    {d:'TARGET ACHIEVED.',
+                 a:'Plate parameters are within the optimal window. Proceed to the next build phase.'},
+    'heavy_stiff':{d:'FULL STOCK — Uniformly thick.',
+                 a:isG?'Thin the entire plate uniformly. Start at the lower bout perimeter, maintaining the domed profile as you work inward.':
+                   isV?'Thin across all zones in proportion — wings first, then the spine.':
+                       'Uniform reduction throughout. Thin the recurve channel and wings of both bouts. Leave the central dome for last.'},
+    'heavy_ok':  {d:'OVER-WEIGHT — Stiffness is correct.',
+                 a:isG?'Thin the lower bout perimeter only. The brace crossing zone should remain untouched.':
+                   isV?'Reduce the outer bouts (wings) progressively. The C-bout flanks can also give up some material.':
+                       'Thin the recurve and outer flanks of upper and lower bouts only. Do not reduce the dome — stiffness is already correct.'},
+    'heavy_flex':{d:'HEAVY & SOFT — Unusual combination.',
+                 a:'This often signals very dense, low-stiffness wood. Thin the perimeter edges carefully to reduce mass, but check structural integrity carefully before proceeding further.'},
+    'ok_stiff':  {d:'MASS CORRECT — Slightly over-stiff.',
+                 a:isG?'Take very light passes on the centre seam area only. Avoid the perimeter completely.':
+                   isV?'Gentle reduction along the central spine only — keep cuts very light.':
+                       'Only the very crown of the central dome needs refinement. Paper-thin passes from the highest point only.'},
+    'ok_flex':   {d:'MASS CORRECT — Slightly flexible.',
+                 a:'This plate will yield a warm, dark-voiced instrument. Further thinning is not recommended — accept the character of this wood.'},
+    'light_stiff':{d:'LIGHT & STIFF — Paradox wood.',
+                 a:'An unusually stiff lightweight blank. Very gentle work on the dome centre <em>may</em> release some stiffness. Otherwise this can produce an excellent plate — proceed with great caution or accept as is.'},
+    'light_ok':  {d:'UNDER-MASS — Balanced frequency.',
+                 a:'Too much material has been removed but the frequency ratio is balanced. Stop thinning. This plate will likely produce a bright, responsive instrument.'},
+    'light_flex':{d:'⚠ STOP — BOTH PARAMETERS UNDER TARGET.',
+                 a:'Do not thin further. The plate has been over-worked. It may still be viable with careful setup and adjustment — consult an experienced maker.'},
+  };
+
+  let {d,a} = advice[mS+'_'+fS] || {d:'—',a:'—'};
+
+  if(step==='b_soundpost'&&isV){
+    const w=inst.includes('jaye')?'9 cm':'7 cm';
+    a+=`<br><br><em>Soundpost plate:</em> Glue a spruce veneer approx ${w} wide across the soundpost line before final assembly.`;
+  }
+  if((step==='f_braced'||step==='b_braced')&&isG){
+    a+='<br><br><em>Brace phase:</em> After final graduation, scallop the brace ends to allow the perimeter to flex freely.';
+  }
+
+  document.getElementById('diagBox').innerText=d;
+  document.getElementById('advBox').innerHTML=a;
+
+  const mC=mR>1.06?'#e07040':mR<0.94?'#5098d8':'#58a860';
+  const fC=fR>1.05?'#e07040':fR<0.95?'#5098d8':'#58a860';
+  const mfEl=document.getElementById('mfDet');
+  mfEl.style.display='block';
+  mfEl.innerHTML=`<span style="color:${mC}">MASS ${Math.round(mPct)}%</span>&nbsp;&nbsp;<span style="color:${fC}">FREQ ${Math.round(fPct)}%</span>&nbsp;&nbsp;<span style="color:var(--amb)">EFF ${eff}%</span>`;
+}
+
+// ── LOG ────────────────────────────────────────────────────────────────────
+function saveToLog(){
+  const cM=document.getElementById('currMass').value;
+  const cF=document.getElementById('currFreq').value;
+  if(!cM||!cF) return;
+  wLog.unshift({
+    step:document.getElementById('step').value,
+    plate:cPlate,
+    mass:cM, freq:cF,
+    eff:document.getElementById('effTag').innerText,
+    diag:document.getElementById('diagBox').innerText
+  });
+  renderLog();
+}
+
+function renderLog(){
+  const tb=document.getElementById('logBody');
+  if(!wLog.length){
+    tb.innerHTML='<tr><td colspan="6" style="color:var(--mut);font-style:italic;padding:.7rem 0">No entries yet.</td></tr>';
+    return;
+  }
+  tb.innerHTML=wLog.map(h=>`<tr>
+    <td>${h.step.replace(/^[fb]_/,'')}</td>
+    <td style="color:var(--mut)">${h.plate}</td>
+    <td>${h.mass}g</td>
+    <td>${h.freq}Hz</td>
+    <td style="color:var(--amb)">${h.eff}</td>
+    <td style="color:var(--mut);font-size:.66rem">${h.diag.substring(0,32)}${h.diag.length>32?'…':''}</td>
+  </tr>`).join('');
+}
+
+function exportCSV(){
+  let csv='Stage,Plate,Mass(g),Freq(Hz),Efficiency,Status\n';
+  wLog.forEach(h=>{csv+=`${h.step},${h.plate},${h.mass},${h.freq},${h.eff},"${h.diag}"\n`});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='rational_luthier_log.csv'; a.click();
+}
+
+// ── MODAL ─────────────────────────────────────────────────────────────────
+let cMTab='mode';
+
+function openModal(){
+  const inst=document.getElementById('instrument').value;
+  const step=document.getElementById('step').value;
+  document.getElementById('moSub').innerText=`${inst.replace(/_/g,' ').toUpperCase()} · ${step.replace(/^[fb]_/,'').toUpperCase()} · ${cMode}`;
+  document.getElementById('mo').classList.add('open');
+  renderMTab(cMTab, inst, step);
+}
+
+function closeModal(){ document.getElementById('mo').classList.remove('open'); }
+function handleMoClick(e){ if(e.target===document.getElementById('mo')) closeModal(); }
+
+function setMTab(tab){
+  cMTab=tab;
+  document.getElementById('tmMode').classList.toggle('on',tab==='mode');
+  document.getElementById('tmZones').classList.toggle('on',tab==='zones');
+  document.getElementById('tcMode').style.display=tab==='mode'?'':'none';
+  document.getElementById('tcZones').style.display=tab==='zones'?'':'none';
+  renderMTab(tab, document.getElementById('instrument').value, document.getElementById('step').value);
+}
+
+function renderMTab(tab, inst, step){
+  if(tab==='mode'){
+    const r=buildModeSVG(inst,step,cMode);
+    document.getElementById('modeSvgBox').innerHTML=r.svg;
+    document.getElementById('holdTxt').innerText=r.holdTxt;
+    document.getElementById('tapTxt').innerText=r.tapTxt;
+  } else {
+    const r=buildZonesSVG(inst);
+    document.getElementById('zonesSvgBox').innerHTML=r.svg;
+    document.getElementById('zonesLeg').innerHTML=r.legHTML;
+  }
+}
+
+// ── UI SETUP ──────────────────────────────────────────────────────────────
+function updateDensRange(){
+  const sel=document.getElementById('woodSpecies');
+  const opt=sel.options[sel.selectedIndex];
+  if(opt&&opt.dataset.range) document.getElementById('densityRange').innerText=opt.dataset.range;
+}
+
+function setPlate(p){
+  cPlate=p;
+  document.getElementById('btnFront').classList.toggle('on',p==='front');
+  document.getElementById('btnBack').classList.toggle('on',p==='back');
+  initUI();
+}
+
+function initUI(){
+  const inst=document.getElementById('instrument').value;
+  const stepSel=document.getElementById('step');
+  const woodSel=document.getElementById('woodSpecies');
+  const isG=inst.includes('hauser')||inst.includes('om')||inst.includes('parlour');
+  const isV=inst.includes('viol_');
+  const isVF=['violin','viola','cello','bass_violin'].includes(inst);
+
+  // Wood list
+  woodSel.innerHTML='';
+  (cPlate==='front'?WOODS.front:WOODS.back).forEach((w,i)=>{
+    const o=document.createElement('option');
+    o.value=w.mod; o.text=w.name; o.dataset.range=w.range;
+    woodSel.add(o);
+    if(i===0) document.getElementById('densityRange').innerText=w.range;
+  });
+
+  // Arch selector
+  document.getElementById('archCont').style.display=isVF?'':'none';
+
+  // Step list
+  stepSel.innerHTML='';
+  if(isG){
+    if(cPlate==='front') stepSel.innerHTML=`<option value="f_raw">Raw Graduation</option><option value="f_holes">Soundhole Cut</option><option value="f_braced">Bracing Phase</option>`;
+    else stepSel.innerHTML=`<option value="b_raw">Raw Graduation</option><option value="b_braced">Bracing Phase</option>`;
+  } else if(isV){
+    if(cPlate==='front') stepSel.innerHTML=`<option value="f_raw">Plate Graduation</option><option value="f_holes">C-Holes Cut</option><option value="f_barred">Bass Bar Phase</option>`;
+    else stepSel.innerHTML=`<option value="b_raw">Raw Graduation</option><option value="b_soundpost">Soundpost Plate Phase</option>`;
+  } else {
+    if(cPlate==='front') stepSel.innerHTML=`<option value="f_raw">Plate Graduation</option><option value="f_holes">F-Holes Cut</option><option value="f_barred">Bass Bar Phase</option>`;
+    else stepSel.innerHTML=`<option value="back">Final Back Graduation</option>`;
+  }
+
+  calc();
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+initUI();
+</script>
 </body>
 </html>
